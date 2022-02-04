@@ -1,0 +1,705 @@
+<script>
+    import { onMount } from "svelte";
+    import {getUserDataCallout , createListCallout, updateListCallout ,deleteListCallout , createTaskCallout , updateTaskCallout , deleteTaskCallout , createComponentCallout , updateComponentCallout , deleteComponentCallout } from '../api';
+    import { AUTH } from "../firebase";
+    import Input from "../utility/Input.svelte";
+    import Popup from "../utility/Popup.svelte";
+    import {registerListener , EVENTS, fireEvent} from '../EventManager';
+    import Sidebar from "../Sidebar.svelte";
+    import Container from "../Container.svelte";
+    import { LIST_STATUS, getStatusClass,getComponentTypeClass, TASK_STATUS , COMPONENT_TYPE_LIST , DEFAULTS} from "../constants";
+    
+    let store = [];
+    let lists = [];
+    const POPUP = {
+        NEW_LIST : false,
+        EDIT_LIST : false,
+        NEW_TASK : false,
+        EDIT_TASK : false,
+        NEW_COMPONENT : false,
+        EDIT_COMPONENT : false
+    }
+
+    const processClosePopup = (_popup) => {
+        try{
+            if(_popup == 'EDIT_LIST'){
+                selected_list = JSON.parse(JSON.stringify(backup_selected_list));
+            }
+            POPUP[_popup] = false;
+        }catch(exp){
+            console.error('exp',exp);
+        }   
+    }
+
+    
+    let selected_list;
+    let backup_selected_list;
+
+    let new_list = {
+        list_name : "",
+        list_start_date : "",
+        list_end_date : "",
+        list_status : DEFAULTS.LIST_STATUS,
+        list_description : ""
+    };
+
+    const handleNewListChange = (e) => {
+        new_list[e.target.dataset.field] = e.target.value;
+    }
+
+    const handleExistingListChange = (e) => {
+        selected_list[e.target.dataset.field] = e.target.value;
+    }
+
+    const processOpenNewListPopup = () => {
+        POPUP.NEW_LIST = true;
+    }
+
+    const processSelectListEvent = (list_id) => {
+        selected_list = store.filter(list => list.list_id == list_id)[0];
+    }
+
+    const processEditListPopup = () => {
+        backup_selected_list = JSON.parse(JSON.stringify(selected_list));
+        POPUP.EDIT_LIST = true;
+    }
+
+    const saveNewList = () => {
+        if(!new_list.list_name) return;
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        createListCallout(
+            AUTH.currentUser.uid,
+            new_list.list_name,
+            JSON.stringify({
+                description : new_list.list_description,
+                status : new_list.list_status,
+                start_date : new_list.list_start_date,
+                end_date : new_list.list_end_date
+            })
+        )
+        .then(res => {
+            store.push({
+                list_id:res.list_id,
+                list_name : res.list_name,
+                list_start_date : res.list_start_date,
+                list_end_date : res.list_end_date,
+                list_description : res.list_description,
+                list_status : res.list_status,
+                list_task_root_id : res.list_task_root_id,
+                list_component_root_id : res.list_component_root_id,
+                list_tasks : [],
+                list_components : []
+            });
+            lists.push({
+                list_id : res.list_id,
+                list_name : res.list_name
+            });
+            new_list = {
+                list_name : "",
+                list_start_date : "",
+                list_end_date : "",
+                list_status : "Not Started",
+                list_description : ""
+            };
+            store = store;
+            lists = lists;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.CLOSE_POPUP,'NEW_LIST');
+        }) 
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+
+    const updateList = () => {
+        if(!selected_list.list_name) return;
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        updateListCallout(
+            AUTH.currentUser.uid,
+            selected_list.list_id,
+            selected_list.list_name,
+            JSON.stringify({
+                description : selected_list.list_description,
+                status : selected_list.list_status,
+                start_date : selected_list.list_start_date,
+                end_date : selected_list.list_end_date
+            })
+        )
+        .then(res => {
+            for(let i=0;i<lists.length;i++){
+                if(lists[i].list_id === selected_list.list_id){
+                    lists[i].list_name = selected_list.list_name;
+                }
+            }
+            backup_selected_list = JSON.parse(JSON.stringify(selected_list));
+            store = store;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.CLOSE_POPUP,'EDIT_LIST');
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+
+    const processDeleteList = () => {
+
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        deleteListCallout(
+            AUTH.currentUser.uid,
+            selected_list.list_id
+        )
+        .then(res => {
+            for(let i=0;i<lists.length;i++){
+                if(lists[i].list_id === selected_list.list_id){
+                    lists.splice(i,1);
+                }
+            }
+            selected_list = null;
+            backup_selected_list = null;
+            store = store;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.CLOSE_POPUP,'EDIT_LIST');
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+
+    }
+
+    let selected_task;
+    let backup_selected_task;
+
+    let new_task = {
+        task_name : "",
+        task_start_date : "",
+        task_end_date : "",
+        task_status : DEFAULTS.TASK_STATUS,
+        task_description : ""
+    };
+
+    const handleNewTaskChange = (e) => {
+        new_task[e.target.dataset.field] = e.target.value;
+    }
+
+    const handleExistingTaskChange = (e) => {
+        selected_task[e.target.dataset.field] = e.target.value;
+    }
+
+    const processOpenTaskPopup = () => {
+        POPUP.NEW_TASK = true;
+    }
+
+    const processEditTaskPopup = (task_id) => {
+        for(let i=0;i<selected_list.list_tasks.length;i++){
+            if(selected_list.list_tasks[i].task_id === task_id){
+                selected_task = JSON.parse(JSON.stringify(selected_list.list_tasks[i]));
+                backup_selected_task = JSON.parse(JSON.stringify(selected_list.list_tasks[i]));
+            }
+        }
+        POPUP.EDIT_TASK = true;
+    }
+
+    const saveNewTask = () => {
+        if(!new_task.task_name) return;
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        createTaskCallout(
+            AUTH.currentUser.uid,
+            new_task.task_name,
+            JSON.stringify({
+                description : new_task.task_description,
+                status : new_task.task_status,
+                start_date : new_task.task_start_date,
+                end_date : new_task.task_end_date
+            }),
+            selected_list.list_task_root_id
+        )
+        .then(res => {
+            selected_list.list_tasks.push({
+                task_id:res.task_id,
+                task_name : res.task_name,
+                task_start_date : res.task_start_date,
+                task_end_date : res.task_end_date,
+                task_description : res.task_description,
+                task_status : res.task_status
+            });
+
+            const selected_list_index = store.findIndex(list => list.list_id === selected_list.list_id);
+
+            store.splice(selected_list_index,1,selected_list);
+            new_task = {
+                task_name : "",
+                task_start_date : "",
+                task_end_date : "",
+                task_status : DEFAULTS.TASK_STATUS,
+                task_description : ""
+            };
+            selected_list = selected_list;
+            store = store;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.CLOSE_POPUP,'NEW_TASK');
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+
+    const updateTask = () => {
+        if(!selected_task.task_name) return;
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        updateTaskCallout(
+            AUTH.currentUser.uid,
+            selected_task.task_id,
+            selected_task.task_name,
+            JSON.stringify({
+                description : selected_task.task_description,
+                status : selected_task.task_status,
+                start_date : selected_task.task_start_date,
+                end_date : selected_task.task_end_date
+            })
+        )
+        .then(res => {
+            selected_task = selected_task;
+            backup_selected_task = JSON.parse(JSON.stringify(selected_task));
+
+            const selected_task_index = selected_list.list_tasks.findIndex(task => task.task_id === selected_task.task_id);
+            selected_list.list_tasks.splice(selected_task_index,1,selected_task);
+            
+            selected_list = selected_list;
+
+            const selected_list_index = store.findIndex(list => list.list_id === selected_list.list_id);
+            store.splice(selected_list_index,1,selected_list);
+            
+            store = store;
+
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.CLOSE_POPUP,'EDIT_TASK');
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+
+    const processDeleteTask = (task_id) => {
+
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        deleteTaskCallout(
+            AUTH.currentUser.uid,
+            task_id
+        )
+        .then(res => {
+            for(let i=0;i<selected_list.list_tasks.length;i++){
+                if(selected_list.list_tasks[i].task_id === task_id){
+                    selected_list.list_tasks.splice(i,1);
+                }
+            }
+            selected_list = selected_list;
+            store = store;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+
+    }
+
+    let selected_component;
+    let backup_selected_component;
+
+    let new_component = {
+        component_name : "",
+        component_type : DEFAULTS.COMPONENT_TYPE,
+        component_version : "",
+        component_parent_name : ""
+    };
+
+    const handleNewComponentChange = (e) => {
+        new_component[e.target.dataset.field] = e.target.value;
+    }
+
+    const handleExistingComponentChange = (e) => {
+        selected_component[e.target.dataset.field] = e.target.value;
+    }
+
+    const processOpenComponentPopup = () => {
+        POPUP.NEW_COMPONENT = true;
+    }
+    
+    const processEditComponentPopup = (component_id) => {
+        for(let i=0;i<selected_list.list_components.length;i++){
+            if(selected_list.list_components[i].component_id === component_id){
+                selected_component = JSON.parse(JSON.stringify(selected_list.list_components[i]));
+                backup_selected_component = JSON.parse(JSON.stringify(selected_list.list_components[i]));
+            }
+        }
+        POPUP.EDIT_COMPONENT = true;
+    }
+
+    const saveNewComponent = () => {
+        if(!new_component.component_name) return;
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        createComponentCallout(
+            AUTH.currentUser.uid,
+            new_component.component_name,
+            JSON.stringify({
+                type : new_component.component_type,
+                version : new_component.component_version,
+                parent_component : new_component.component_parent_name
+            }),
+            selected_list.list_component_root_id
+        )
+        .then(res => {
+            selected_list.list_components.push({
+                component_id:res.component_id,
+                component_name : res.component_name,
+                component_type : res.component_type,
+                component_version : res.component_version,
+                component_parent_name : res.component_parent_name
+            });
+
+            const selected_list_index = store.findIndex(list => list.list_id === selected_list.list_id);
+            store.splice(selected_list_index,1,selected_list);
+
+            new_component = {
+                component_name : "",
+                component_type : DEFAULTS.COMPONENT_TYPE,
+                component_version : "",
+                component_parent_name : ""
+            };
+
+            selected_list = selected_list;
+            store = store;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.CLOSE_POPUP,'NEW_COMPONENT');
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+
+    const updateComponent = () => {
+        if(!selected_component.component_name) return;
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        updateComponentCallout(
+            AUTH.currentUser.uid,
+            selected_component.component_id,
+            selected_component.component_name,
+            JSON.stringify({
+                type : selected_component.component_type,
+                version : selected_component.component_version,
+                parent_component : selected_component.component_parent_name
+            })
+        )
+        .then(res => {
+            selected_component = selected_component;
+            backup_selected_component = JSON.parse(JSON.stringify(selected_component));
+
+            const selected_component_index = selected_list.list_components.findIndex(component => component.component_id === selected_component.component_id);
+            selected_list.list_components.splice(selected_component_index,1,selected_component);
+            
+            selected_list = selected_list;
+
+            const selected_list_index = store.findIndex(list => list.list_id === selected_list.list_id);
+            store.splice(selected_list_index,1,selected_list);
+            
+            store = store;
+
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.CLOSE_POPUP,'EDIT_COMPONENT');
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+
+    const processDeleteComponent = (component_id) => {
+
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        deleteComponentCallout(
+            AUTH.currentUser.uid,
+            component_id
+        )
+        .then(res => {
+            for(let i=0;i<selected_list.list_components.length;i++){
+                if(selected_list.list_components[i].component_id === component_id){
+                    selected_list.list_components.splice(i,1);
+                }
+            }
+            selected_list = selected_list;
+            store = store;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+    
+
+    onMount( () => {
+        
+        registerListener(EVENTS.SELECT_LIST,processSelectListEvent);
+        registerListener(EVENTS.OPEN_NEW_LIST_POPUP,processOpenNewListPopup);
+        registerListener(EVENTS.OPEN_EDIT_LIST_POPUP,processEditListPopup);
+        registerListener(EVENTS.DELETE_LIST,processDeleteList);
+
+        registerListener(EVENTS.OPEN_NEW_TASK_POPUP,processOpenTaskPopup);
+        registerListener(EVENTS.OPEN_EDIT_TASK_POPUP,processEditTaskPopup);
+        registerListener(EVENTS.DELETE_TASK,processDeleteTask);
+
+        registerListener(EVENTS.OPEN_NEW_COMPONENT_POPUP,processOpenComponentPopup);
+        registerListener(EVENTS.OPEN_EDIT_COMPONENT_POPUP,processEditComponentPopup);
+        registerListener(EVENTS.DELETE_COMPONENET,processDeleteComponent);
+
+        registerListener(EVENTS.CLOSE_POPUP,processClosePopup);
+        
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+
+        getUserDataCallout(AUTH.currentUser.uid)
+        .then(res => {
+            if(res && res.data && res.data.length){
+                store = res.data;
+                for(let i=0;i<store.length;i++){
+                    lists.push({
+                        list_id : store[i].list_id,
+                        list_name : store[i].list_name
+                    });
+                }
+                lists = lists;
+                store = store;
+                fireEvent(EVENTS.HIDE_SPINNER,{});
+            }else{
+                fireEvent(EVENTS.HIDE_SPINNER,{});
+            }
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        })
+    });
+
+</script>
+
+<div class="app-container flex align-center flex-column">
+    <Sidebar {lists} selected_list_id={selected_list?.list_id}/>
+    {#if selected_list}
+        <Container {selected_list}/>
+    {/if}
+</div>
+
+{#if POPUP.NEW_LIST}
+    <Popup header="New List" _popup_name="NEW_LIST" OnSave={saveNewList}>
+        <div class="flex flex-column justify-center">
+
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_list.list_name} onChange={handleNewListChange} data_field="list_name" />
+                </div>
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(new_list.list_status)} value={new_list.list_status} onChange={handleNewListChange} data_field="list_status" options={LIST_STATUS}/>
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_list.list_start_date} onChange={handleNewListChange} data_field="list_start_date" />
+                </div>
+                
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_list.list_end_date} onChange={handleNewListChange} data_field="list_end_date" />
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Description" hasLabel width_class="width-full" type="text-long" classes="bg-transparent" value={new_list.list_description} onChange={handleNewListChange} data_field="list_description" />
+                </div>
+                
+            </div>
+            
+        </div>
+    </Popup>
+{/if}
+
+{#if POPUP.EDIT_LIST}
+    <Popup header="Edit List" _popup_name="EDIT_LIST" OnSave={updateList}>
+        <div class="flex flex-column justify-center">
+
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_list.list_name} onChange={handleExistingListChange} data_field="list_name" />
+                </div>
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(selected_list.list_status)} value={selected_list.list_status} onChange={handleExistingListChange} data_field="list_status" options={LIST_STATUS}/>
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_list.list_start_date} onChange={handleExistingListChange} data_field="list_start_date" />
+                </div>
+                
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_list.list_end_date} onChange={handleExistingListChange} data_field="list_end_date" />
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Description" hasLabel width_class="width-full" type="text-long" classes="bg-transparent" value={selected_list.list_description} onChange={handleExistingListChange} data_field="list_description" />
+                </div>
+                
+            </div>
+            
+        </div>
+    </Popup>
+{/if}
+
+{#if POPUP.NEW_TASK}
+    <Popup header="New Task" _popup_name="NEW_TASK" OnSave={saveNewTask}>
+        <div class="flex flex-column justify-center">
+
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_task.task_name} onChange={handleNewTaskChange} data_field="task_name" />
+                </div>
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(new_task.task_status)} value={new_task.task_status} onChange={handleNewTaskChange} data_field="task_status" options={TASK_STATUS}/>
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_task.task_start_date} onChange={handleNewTaskChange} data_field="task_start_date" />
+                </div>
+                
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_task.task_end_date} onChange={handleNewTaskChange} data_field="task_end_date" />
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Description" hasLabel width_class="width-full" type="text-long" classes="bg-transparent" value={new_task.task_description} onChange={handleNewTaskChange} data_field="task_description" />
+                </div>
+                
+            </div>
+            
+        </div>
+    </Popup>
+{/if}
+
+{#if POPUP.EDIT_TASK}
+    <Popup header="Edit Task" _popup_name="EDIT_TASK" OnSave={updateTask}>
+        <div class="flex flex-column justify-center">
+
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_task.task_name} onChange={handleExistingTaskChange} data_field="task_name" />
+                </div>
+                
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(selected_task.task_status)} value={selected_task.task_status} onChange={handleExistingTaskChange} data_field="task_status" options={TASK_STATUS}/>
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_task.task_start_date} onChange={handleExistingTaskChange} data_field="task_start_date" />
+                </div>
+                
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_task.task_end_date} onChange={handleExistingTaskChange} data_field="task_end_date" />
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Description" hasLabel width_class="width-full" type="text-long" classes="bg-transparent" value={selected_task.task_description} onChange={handleExistingTaskChange} data_field="task_description" />
+                </div>
+                
+            </div>
+            
+        </div>
+    </Popup>
+{/if}
+
+{#if POPUP.NEW_COMPONENT}
+    <Popup header="New Component" _popup_name="NEW_COMPONENT" OnSave={saveNewComponent}>
+        <div class="flex flex-column justify-center">
+            <div class="flex form-row">
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_component.component_name} onChange={handleNewComponentChange} data_field="component_name" />
+                </div>
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Type" hasLabel width_class="width-full" type="select" classes="bg-transparent {getComponentTypeClass(new_component.component_type)}" value={new_component.component_type} onChange={handleNewComponentChange} data_field="component_type" options={COMPONENT_TYPE_LIST}/>
+                </div>
+            </div>
+            <div class="flex form-row">
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_component.component_version} onChange={handleNewComponentChange} data_field="component_version" />
+                </div>
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Parent Component (if any)" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_component.component_parent_name} onChange={handleNewComponentChange} data_field="component_parent_name" />
+                </div>
+            </div>
+        </div>
+    </Popup>
+{/if}
+
+{#if POPUP.EDIT_COMPONENT}
+    <Popup header="Edit Component" _popup_name="EDIT_COMPONENT" OnSave={updateComponent}>
+        <div class="flex flex-column justify-center">
+
+            <div class="flex form-row">
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_component.component_name} onChange={handleExistingComponentChange} data_field="component_name" />
+                </div>
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Type" hasLabel width_class="width-full" type="select" classes="bg-transparent {getComponentTypeClass(selected_component.component_type)}" value={selected_component.component_type} onChange={handleExistingComponentChange} data_field="component_type" options={COMPONENT_TYPE_LIST}/>
+                </div>
+                
+            </div>
+            <div class="flex form-row">
+
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_component.component_version} onChange={handleExistingComponentChange} data_field="component_version" />
+                </div>
+                <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Parent Component (if any)" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_component.component_parent_name} onChange={handleExistingComponentChange} data_field="component_parent_name" />
+                </div>
+                
+            </div>
+            
+        </div>
+    </Popup>
+{/if}
+
+
+<style>
+
+    .app-container{
+        margin:0;
+        padding: 0;
+        height: 100vh;
+    }
+
+    .form-row{
+        padding: 1rem 0;
+    }
+
+    .form-column{
+        padding: 0 1rem;
+        width: 50%;
+    }
+
+</style>
