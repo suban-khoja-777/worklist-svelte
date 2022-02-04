@@ -97,6 +97,20 @@
         border-radius: .357rem;
     }
 
+    input[data-type="field"][type="email"]{
+        border: 1px solid var(--border-primary-color);
+        background-color: var(--secondary-color);
+        color : var(--text-tertiary-color);
+        border-radius: .357rem;
+    }
+
+    input[data-type="field"][type="password"]{
+        border: 1px solid var(--border-primary-color);
+        background-color: var(--secondary-color);
+        color : var(--text-tertiary-color);
+        border-radius: .357rem;
+    }
+
     input[data-type="field"][type="date"]{
         border: 1px solid var(--border-primary-color);
         background-color: var(--secondary-color);

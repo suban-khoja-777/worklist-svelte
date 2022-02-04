@@ -154,9 +154,9 @@
                         </span>
                         <br/>
                         <br/>
-                        <Input name="email" type="email" label="Email" label_class="dark" hasLabel onChange={handleChange}/>
+                        <Input data_type="field" name="email" type="email" label="Email" label_class="light" hasLabel onChange={handleChange}/>
                         <br/>
-                        <Input name="password" type="password" label="Password" label_class="dark" hasLabel onChange={handleChange}/>
+                        <Input data_type="field" name="password" type="password" label="Password" label_class="light" hasLabel onChange={handleChange}/>
                         <br/>
                         <Button onClick={onSignIn} label="Login" type="primary"/>
                     </div>
