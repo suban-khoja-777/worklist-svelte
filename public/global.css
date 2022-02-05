@@ -180,15 +180,15 @@ body {
 }
 
 .component_name{
-	width: 40% !important;
+	width: 30% !important;
 }
 
-.component_type , .component_version{
+.component_type , .component_version , .component_date{
 	width: 15% !important;
 }
 
 .component_parent_name{
-	width: 20% !important;
+	width: 25% !important;
 }
 
 .task_start_date,.task_end_date{

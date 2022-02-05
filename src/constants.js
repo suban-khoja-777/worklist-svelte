@@ -116,6 +116,15 @@ const COMPONENT_COLUMN = [
         field_type : "text"
     },
     {
+        label : "Date",
+        key : "component_date",
+        show_in_list : true,
+        show_in_detail : false,
+        show_header : true,
+        allow_inline_edit : true,
+        field_type : "text"
+    },
+    {
         label : "Parent Component",
         key : "component_parent_name",
         show_in_list : true,

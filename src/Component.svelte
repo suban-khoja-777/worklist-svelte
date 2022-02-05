@@ -39,6 +39,9 @@
     <span class="column flex grow justify-center border-box text-bold pointer component_version  justify-center align-center">
         <Input label="Version" width_class="width-full" type="text" classes="bg-transparent text-center" value={component.component_version} data_field="component_version" readOnly/>
     </span>
+    <span class="column flex grow justify-center border-box text-bold pointer component_date  justify-center align-center">
+        <Input label="Version" width_class="width-full" type="text" classes="bg-transparent text-center" value={component.component_date} data_field="component_version" readOnly/>
+    </span>
     <span class="column flex grow justify-center border-box text-bold pointer component_parent_name  justify-center align-center">
         <Input label="Parent Component (if any)" width_class="width-full" type="text" classes="bg-transparent text-center" value={component.component_parent_name} data_field="component_parent_name" readOnly/>
     </span>
