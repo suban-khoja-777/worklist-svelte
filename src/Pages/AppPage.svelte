@@ -8,7 +8,7 @@
     import Sidebar from "../Sidebar.svelte";
     import Container from "../Container.svelte";
     import { LIST_STATUS, getStatusClass,getComponentTypeClass, TASK_STATUS , COMPONENT_TYPE_LIST , DEFAULTS} from "../constants";
-    
+
     let store = [];
     let lists = [];
     const POPUP = {
@@ -309,7 +309,8 @@
         component_name : "",
         component_type : DEFAULTS.COMPONENT_TYPE,
         component_version : "",
-        component_parent_name : ""
+        component_parent_name : "",
+        component_date : ""
     };
 
     const handleNewComponentChange = (e) => {
@@ -335,7 +336,7 @@
     }
 
     const saveNewComponent = () => {
-        if(!new_component.component_name) return;
+        if(!new_component.component_name || !new_component.component_date) return;
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createComponentCallout(
             AUTH.currentUser.uid,
@@ -343,7 +344,8 @@
             JSON.stringify({
                 type : new_component.component_type,
                 version : new_component.component_version,
-                parent_component : new_component.component_parent_name
+                parent_component : new_component.component_parent_name,
+                date : new_component.component_date
             }),
             selected_list.list_component_root_id
         )
@@ -353,7 +355,8 @@
                 component_name : res.component_name,
                 component_type : res.component_type,
                 component_version : res.component_version,
-                component_parent_name : res.component_parent_name
+                component_parent_name : res.component_parent_name,
+                component_date : res.component_date,
             });
 
             const selected_list_index = store.findIndex(list => list.list_id === selected_list.list_id);
@@ -363,7 +366,8 @@
                 component_name : "",
                 component_type : DEFAULTS.COMPONENT_TYPE,
                 component_version : "",
-                component_parent_name : ""
+                component_parent_name : "",
+                component_date : ""
             };
 
             selected_list = selected_list;
@@ -377,7 +381,7 @@
     }
 
     const updateComponent = () => {
-        if(!selected_component.component_name) return;
+        if(!selected_component.component_name || !selected_component.component_name) return;
         fireEvent(EVENTS.SHOW_SPINNER,{});
         updateComponentCallout(
             AUTH.currentUser.uid,
@@ -386,7 +390,8 @@
             JSON.stringify({
                 type : selected_component.component_type,
                 version : selected_component.component_version,
-                parent_component : selected_component.component_parent_name
+                parent_component : selected_component.component_parent_name,
+                date : selected_component.component_date
             })
         )
         .then(res => {
@@ -646,8 +651,13 @@
             </div>
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_component.component_date} onChange={handleNewComponentChange} data_field="component_date" />
+                </div>
+                <div class="flex flex-column form-column grow">
                     <Input data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_component.component_version} onChange={handleNewComponentChange} data_field="component_version" />
                 </div>
+            </div>
+            <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
                     <Input data_type="field" label="Parent Component (if any)" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_component.component_parent_name} onChange={handleNewComponentChange} data_field="component_parent_name" />
                 </div>
@@ -672,12 +682,17 @@
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
+                    <Input data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_component.component_date} onChange={handleExistingComponentChange} data_field="component_date" />
+                </div>
+                <div class="flex flex-column form-column grow">
                     <Input data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_component.component_version} onChange={handleExistingComponentChange} data_field="component_version" />
                 </div>
+                
+            </div>
+            <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
                     <Input data_type="field" label="Parent Component (if any)" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_component.component_parent_name} onChange={handleExistingComponentChange} data_field="component_parent_name" />
                 </div>
-                
             </div>
             
         </div>
