@@ -5,15 +5,21 @@ const API = {
     BASE_ENDPOINT : 'https://worklist1-developer-edition.ap27.force.com/services/apexrest/api/v1/',
     ENDPOINTS : {
         "getUserData" : 'getUserData',
+        "getUserGeneralTasks" : 'getUserGeneralTasks',
         "createList" : "createList",
         "updateList" : "updateList",
         "deleteList" : "deleteList",
         "createTask" : "createTask",
         "updateTask" : "updateTask",
         "deleteTask" : "deleteTask",
+        "createGeneralTask" : "createGeneralTask",
+        "updateGeneralTask" : "updateGeneralTask",
+        "deleteGeneralTask" : "deleteGeneralTask",
+        "deleteBulkGeneralTask" : "deleteBulkGeneralTask",
         "createComponent" : "createComponent",
         "updateComponent" : "updateComponent",
-        "deleteComponent" : "deleteComponent"
+        "deleteComponent" : "deleteComponent",
+        "exportListComponents":"exportListComponents"
     }
 };
 
@@ -206,6 +212,27 @@ const getBulletClass = (_status) => {
     if(!_status) return '';
     return 'Bullet-'+_status.replace(' ','-');
 }
+
+const encoding_decoding = (str,key) => {
+    let enc = "";
+    let encodedKey = "";
+    // make sure that input is string
+    str = str.toString();
+    for (let i = 0; i < key.length; i++) {
+        encodedKey += key.charCodeAt(i);
+    }
+    encodedKey = ""+encodedKey;
+    encodedKey = encodedKey.substr(0,10);
+    for (let i = 0; i < str.length; i++) {
+        // create block
+        const a = str.charCodeAt(i);
+        // bitwise XOR
+        const b = a ^ encodedKey;
+        enc = enc + String.fromCharCode(b);
+    }
+    return enc;
+}   
+
 
 Object.freeze(API);
 Object.freeze(LIST_STATUS);

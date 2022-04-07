@@ -15,10 +15,11 @@
     export let options;
     export let data_type
     export let readOnly;
+    export let Required;
 </script>
 
 {#if hasLabel}
-    <label class="{label_class}" for={name}>{label}</label>    
+    <label class="{label_class}" for={name}>{label}{Required ? ' *' : ''}</label>  
 {/if}
 
 {#if type === 'select'}
@@ -138,6 +139,15 @@
         background-color: var(--secondary-color) !important;
         color : var(--text-tertiary-color) !important;
         border-radius: .357rem !important;
+    }
+
+    label.has-error{
+        color: #ea5455 !important;
+    }
+
+    input.has-error{
+        background-color: #ea545520 !important;
+        border-color: #ea5455 !important;
     }
 
 </style>

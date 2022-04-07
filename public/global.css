@@ -104,6 +104,10 @@ body {
 	align-items: stretch;
 }
 
+.align-end{
+	align-items: flex-end;
+}
+
 
 .justify-center{
 	justify-content: center;
@@ -289,3 +293,22 @@ body {
     background-color: #28c76f;
 }
 /** Badge Class End **/
+
+.badge{
+	font-size: 1.5rem;
+}
+
+.badge-not-started{
+	background-color: #ea545520;
+	color: #ea5455;
+}
+
+.badge-in-progress{
+	background-color: #ff9f4320;
+	color: #ff9f43;
+}
+
+.badge-completed{
+	background-color: #28c76f20;
+	color: #28c76f;
+}

@@ -5,6 +5,9 @@
     
     export let header;
     export let OnSave;
+    export let showSave = true;
+    export let showActions = true;
+    export let saveLabel = "Save";
     export let _popup_name;
 
     const fireClosePopupEvent = () => {
@@ -27,9 +30,13 @@
         <div class="modal-body">
             <slot/>
         </div>
-        <footer class="modal-footer flex flex-end align-center">
-            <Button onClick={OnSave} label="Save" type="primary"/>
-        </footer>
+        {#if showActions}
+            <footer class="modal-footer flex flex-end align-center">
+                {#if showSave}
+                    <Button onClick={OnSave} label={saveLabel} type="primary"/>
+                {/if}
+            </footer>    
+        {/if}
     </div>
 </div>
 

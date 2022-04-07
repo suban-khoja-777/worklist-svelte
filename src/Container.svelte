@@ -1,14 +1,13 @@
 <script>
     import { TASK_COLUMN , COMPONENT_COLUMN , getBulletClass} from "./constants";
     import { EVENTS , fireEvent } from "./EventManager";
+    import { AUTH } from "./firebase";
     import Task from "./Task.svelte";
     import Component from "./Component.svelte";
-
+    import { exportListComponentsCallout } from "./api";
     import Icon from "./utility/Icon.svelte";
     
     export let selected_list;
-
-    handleListChange
 
     const handleListChange = (e) => {
         selected_list[e.target.dataset.field] = e.target.value;
@@ -27,7 +26,34 @@
     }
 
     const sendDeleteListEvent = () => {
+        console.log('processDeleteList Fired');
         fireEvent(EVENTS.DELETE_LIST,{});
+    }
+
+    const exportComponents = () => {
+        const data = JSON.stringify(selected_list.list_components);
+        const file_name = selected_list.list_name + ' Components';
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        exportListComponentsCallout(
+            AUTH.currentUser.uid,
+            file_name,
+            data  
+        ).then(res => {
+            const exportURL = URL.createObjectURL(res);
+            const aTag = document.createElement("a");
+            document.body.appendChild(aTag);
+            aTag.style = "display: none";
+            aTag.href = exportURL;
+            aTag.download = file_name+'.csv';
+            aTag.click();
+            window.URL.revokeObjectURL(exportURL);
+            document.body.removeChild(aTag);
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        }) 
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            console.error(err);
+        });
     }
 
 </script>
@@ -73,6 +99,13 @@
 
         {#if selected_list.list_tasks && selected_list.list_tasks.length}
             <div class="task-container flex justify-start align-center grow flex-column">
+                <li class="columns flex justify-end align-center text-white text-bold">
+                    <div class="flex justify-center aggregator-container">
+                        <span class="flex align-center justify-center badge grow badge-not-started">{selected_list.list_tasks.filter(task => task.task_status === "Not Started").length}</span>
+                        <span class="flex align-center justify-center badge grow badge-in-progress">{selected_list.list_tasks.filter(task => task.task_status === "In Progress").length}</span>
+                        <span class="flex align-center justify-center badge grow badge-completed">{selected_list.list_tasks.filter(task => task.task_status === "Completed").length}</span>
+                    </div>
+                </li>
                 <li class="columns flex justify-space-between align-center text-white text-bold">
                     {#each TASK_COLUMN as column}
                         {#if column.show_in_list}
@@ -81,7 +114,7 @@
                     {/each}
                 </li>
                 {#each selected_list.list_tasks as task}
-                    <Task {task} />    
+                    <Task {task} actions={['EDIT','DELETE']}/>    
                 {/each}
             </div>
             {:else}
@@ -99,11 +132,21 @@
                 </svg>
                 <span class="task-title"> Components </span>
             </div>
-            <Icon type="primary" OnClick={sendNewComponentEvent}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus">
-                    <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-            </Icon>
+            <div class="flex align-center">
+                {#if selected_list.list_components && selected_list.list_components.length}
+                    <Icon type="danger" OnClick={exportComponents}>
+                        <svg data-v-9a6e255c="" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download">
+                            <path data-v-9a6e255c="" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline data-v-9a6e255c="" points="7 10 12 15 17 10"></polyline><line data-v-9a6e255c="" x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </Icon>&nbsp;&nbsp;
+                {/if}
+                <Icon type="primary" OnClick={sendNewComponentEvent}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus">
+                        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </Icon>
+            </div>
+            
         </div>
 
         {#if selected_list.list_components && selected_list.list_components.length}
@@ -116,7 +159,7 @@
                     {/each}
                 </li>
                 {#each selected_list.list_components as component}
-                    <Component {component} />    
+                    <Component {component} actions={['EDIT','DELETE']}/>    
                 {/each}
             </div>
             {:else}
@@ -132,9 +175,9 @@
 <style>
 
     .detail-container{
-        margin-left: 20vw;
+        margin-left: calc(20vw + 5.25rem);
         height: 100vh;
-        width: 80vw;
+        width: calc(100vw - (20vw + 5.25rem));
         padding: 1rem;
     }
 
@@ -184,8 +227,12 @@
         width: 15%;
     }
 
-    .task_status{
+    .task_status,.aggregator-container{
         width: 15%;
+    }
+
+    .aggregator-container{
+        height: 40px;
     }
 
     .column:first-of-type{

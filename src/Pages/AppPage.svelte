@@ -1,10 +1,10 @@
 <script>
-    import { onMount } from "svelte";
+    import { onMount , onDestroy} from "svelte";
     import {getUserDataCallout , createListCallout, updateListCallout ,deleteListCallout , createTaskCallout , updateTaskCallout , deleteTaskCallout , createComponentCallout , updateComponentCallout , deleteComponentCallout } from '../api';
     import { AUTH } from "../firebase";
     import Input from "../utility/Input.svelte";
     import Popup from "../utility/Popup.svelte";
-    import {registerListener , EVENTS, fireEvent} from '../EventManager';
+    import {registerListener , unregisterListener, EVENTS, fireEvent} from '../EventManager';
     import Sidebar from "../Sidebar.svelte";
     import Container from "../Container.svelte";
     import { LIST_STATUS, getStatusClass,getComponentTypeClass, TASK_STATUS , COMPONENT_TYPE_LIST , DEFAULTS} from "../constants";
@@ -21,16 +21,11 @@
     }
 
     const processClosePopup = (_popup) => {
-        try{
-            if(_popup == 'EDIT_LIST'){
-                selected_list = JSON.parse(JSON.stringify(backup_selected_list));
-            }
-            POPUP[_popup] = false;
-        }catch(exp){
-            console.error('exp',exp);
-        }   
+        if(_popup == 'EDIT_LIST'){
+            selected_list = JSON.parse(JSON.stringify(backup_selected_list));
+        }
+        POPUP[_popup] = false; 
     }
-
     
     let selected_list;
     let backup_selected_list;
@@ -43,6 +38,12 @@
         list_description : ""
     };
 
+    let list_fields = {
+        list_name : true,
+        list_start_date : true,
+        list_end_date : true
+    }
+
     const handleNewListChange = (e) => {
         new_list[e.target.dataset.field] = e.target.value;
     }
@@ -52,10 +53,20 @@
     }
 
     const processOpenNewListPopup = () => {
+        list_fields = {
+            list_name : true,
+            list_start_date : true,
+            list_end_date : true
+        }
         POPUP.NEW_LIST = true;
     }
 
     const processSelectListEvent = (list_id) => {
+        list_fields = {
+            list_name : true,
+            list_start_date : true,
+            list_end_date : true
+        }
         selected_list = store.filter(list => list.list_id == list_id)[0];
     }
 
@@ -65,7 +76,52 @@
     }
 
     const saveNewList = () => {
-        if(!new_list.list_name) return;
+        if(!new_list.list_name){
+            list_fields.list_name = false;
+            return;
+        }else{
+            list_fields.list_name = true;
+        }
+        
+
+        if(new_list.list_status === "In Progress"){
+            if(!new_list.list_start_date){
+                list_fields.list_start_date = false;
+                return;
+            }else{
+                list_fields.list_start_date = true;
+            }
+        }
+
+        if(new_list.list_status === "Completed"){
+            if(!new_list.list_start_date){
+                list_fields.list_start_date = false;
+                return;
+            }else{
+                list_fields.list_start_date = true;
+            }
+            if(!new_list.list_end_date){
+                list_fields.list_end_date = false;
+                return;
+            }else{
+                list_fields.list_end_date = true;
+            }
+        }
+
+        if(new_list.list_start_date && new_list.list_end_date){
+            let start_date = new Date(new_list.list_start_date);
+            let end_date = new Date(new_list.list_end_date);
+            if(end_date - start_date < 0){
+                list_fields.list_end_date = false;
+                list_fields.list_start_date = false;
+                return;
+            }else{
+                list_fields.list_end_date = true;
+                list_fields.list_start_date = true;
+            }
+        }
+
+        
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createListCallout(
             AUTH.currentUser.uid,
@@ -108,11 +164,56 @@
         }) 
         .catch(err => {
             fireEvent(EVENTS.HIDE_SPINNER,{});
+            console.error(err);
         });
     }
 
     const updateList = () => {
-        if(!selected_list.list_name) return;
+        if(!selected_list.list_name){
+            list_fields.list_name = false;
+            return;
+        }else{
+            list_fields.list_name = true;
+        }
+        
+
+        if(selected_list.list_status === "In Progress"){
+            if(!selected_list.list_start_date){
+                list_fields.list_start_date = false;
+                return;
+            }else{
+                list_fields.list_start_date = true;
+            }
+        }
+
+        if(selected_list.list_status === "Completed"){
+            if(!selected_list.list_start_date){
+                list_fields.list_start_date = false;
+                return;
+            }else{
+                list_fields.list_start_date = true;
+            }
+            if(!selected_list.list_end_date){
+                list_fields.list_end_date = false;
+                return;
+            }else{
+                list_fields.list_end_date = true;
+            }
+        }
+
+        if(selected_list.list_start_date && selected_list.list_end_date){
+            let start_date = new Date(selected_list.list_start_date);
+            let end_date = new Date(selected_list.list_end_date);
+            if(end_date - start_date < 0){
+                list_fields.list_end_date = false;
+                list_fields.list_start_date = false;
+                return;
+            }else{
+                list_fields.list_end_date = true;
+                list_fields.list_start_date = true;
+            }
+        }
+
         fireEvent(EVENTS.SHOW_SPINNER,{});
         updateListCallout(
             AUTH.currentUser.uid,
@@ -141,8 +242,9 @@
         });
     }
 
-    const processDeleteList = () => {
-
+    function processDeleteList () {
+        let sure = window.confirm(`Are you sure you want to delete ${selected_list.list_name} ?`);
+        if(!sure) return;
         fireEvent(EVENTS.SHOW_SPINNER,{});
         deleteListCallout(
             AUTH.currentUser.uid,
@@ -158,7 +260,6 @@
             backup_selected_list = null;
             store = store;
             fireEvent(EVENTS.HIDE_SPINNER,{});
-            fireEvent(EVENTS.CLOSE_POPUP,'EDIT_LIST');
         })
         .catch(err => {
             fireEvent(EVENTS.HIDE_SPINNER,{});
@@ -177,6 +278,12 @@
         task_description : ""
     };
 
+    let task_fields = {
+        task_name : true,
+        task_start_date : true,
+        task_end_date : true
+    }
+
     const handleNewTaskChange = (e) => {
         new_task[e.target.dataset.field] = e.target.value;
     }
@@ -186,6 +293,11 @@
     }
 
     const processOpenTaskPopup = () => {
+        task_fields = {
+            task_name : true,
+            task_start_date : true,
+            task_end_date : true
+        }
         POPUP.NEW_TASK = true;
     }
 
@@ -196,11 +308,60 @@
                 backup_selected_task = JSON.parse(JSON.stringify(selected_list.list_tasks[i]));
             }
         }
+        task_fields = {
+            task_name : true,
+            task_start_date : true,
+            task_end_date : true
+        }
         POPUP.EDIT_TASK = true;
     }
 
     const saveNewTask = () => {
-        if(!new_task.task_name) return;
+
+        if(!new_task.task_name){
+            task_fields.task_name = false;
+            return;
+        }else{
+            task_fields.task_name = true;
+        }
+
+        if(new_task.task_status === "Completed"){
+            if(!new_task.task_start_date){
+                task_fields.task_start_date = false;
+                return;
+            }else{
+                task_fields.task_start_date = true;
+            }
+            if(!new_task.task_end_date){
+                task_fields.task_end_date = false;
+                return;
+            }else{
+                task_fields.task_end_date = true;
+            }
+        }
+
+        if(new_task.task_status === "In Progress"){
+            if(!new_task.task_start_date){
+                task_fields.task_start_date = false;
+                return;
+            }else{
+                task_fields.task_start_date = true;
+            }
+        }
+
+        if(new_task.task_start_date && new_task.task_end_date){
+            let start_date = new Date(new_task.task_start_date);
+            let end_date = new Date(new_task.task_end_date);
+            if(end_date - start_date < 0){
+                task_fields.task_end_date = false;
+                task_fields.task_start_date = false;
+                return;
+            }else{
+                task_fields.task_end_date = true;
+                task_fields.task_start_date = true;
+            }
+        }
+
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createTaskCallout(
             AUTH.currentUser.uid,
@@ -244,7 +405,50 @@
     }
 
     const updateTask = () => {
-        if(!selected_task.task_name) return;
+        
+        if(!selected_task.task_name){
+            task_fields.task_name = false;
+            return;
+        }else{
+            task_fields.task_name = true;
+        }
+
+        if(selected_task.task_status === "Completed"){
+            if(!selected_task.task_start_date){
+                task_fields.task_start_date = false;
+                return;
+            }else{
+                task_fields.task_start_date = true;
+            }
+            if(!selected_task.task_end_date){
+                task_fields.task_end_date = false;
+                return;
+            }else{
+                task_fields.task_end_date = true;
+            }
+        }
+
+        if(selected_task.task_status === "In Progress"){
+            if(!selected_task.task_start_date){
+                task_fields.task_start_date = false;
+                return;
+            }else{
+                task_fields.task_start_date = true;
+            }
+        }
+
+        if(selected_task.task_start_date && selected_task.task_end_date){
+            let start_date = new Date(selected_task.task_start_date);
+            let end_date = new Date(selected_task.task_end_date);
+            if(end_date - start_date < 0){
+                task_fields.task_end_date = false;
+                task_fields.task_start_date = false;
+                return;
+            }else{
+                task_fields.task_end_date = true;
+                task_fields.task_start_date = true;
+            }
+        }
         fireEvent(EVENTS.SHOW_SPINNER,{});
         updateTaskCallout(
             AUTH.currentUser.uid,
@@ -280,26 +484,28 @@
     }
 
     const processDeleteTask = (task_id) => {
-
-        fireEvent(EVENTS.SHOW_SPINNER,{});
-        deleteTaskCallout(
-            AUTH.currentUser.uid,
-            task_id
-        )
-        .then(res => {
-            for(let i=0;i<selected_list.list_tasks.length;i++){
-                if(selected_list.list_tasks[i].task_id === task_id){
-                    selected_list.list_tasks.splice(i,1);
+        if(selected_list.list_tasks.filter(task => task.task_id == task_id).length){
+            let sure = window.confirm(`Are you sure you want to delete the task?`);
+            if(!sure) return;
+            fireEvent(EVENTS.SHOW_SPINNER,{});
+            deleteTaskCallout(
+                AUTH.currentUser.uid,
+                task_id
+            )
+            .then(res => {
+                for(let i=0;i<selected_list.list_tasks.length;i++){
+                    if(selected_list.list_tasks[i].task_id === task_id){
+                        selected_list.list_tasks.splice(i,1);
+                    }
                 }
-            }
-            selected_list = selected_list;
-            store = store;
-            fireEvent(EVENTS.HIDE_SPINNER,{});
-        })
-        .catch(err => {
-            fireEvent(EVENTS.HIDE_SPINNER,{});
-        });
-
+                selected_list = selected_list;
+                store = store;
+                fireEvent(EVENTS.HIDE_SPINNER,{});
+            })
+            .catch(err => {
+                fireEvent(EVENTS.HIDE_SPINNER,{});
+            });
+        }
     }
 
     let selected_component;
@@ -313,6 +519,12 @@
         component_date : ""
     };
 
+    let component_fields = {
+        component_name : true,
+        component_date : true,
+        component_version : true
+    }
+
     const handleNewComponentChange = (e) => {
         new_component[e.target.dataset.field] = e.target.value;
     }
@@ -322,6 +534,11 @@
     }
 
     const processOpenComponentPopup = () => {
+        component_fields = {
+            component_name : true,
+            component_date : true,
+            component_version : true
+        }
         POPUP.NEW_COMPONENT = true;
     }
     
@@ -332,11 +549,39 @@
                 backup_selected_component = JSON.parse(JSON.stringify(selected_list.list_components[i]));
             }
         }
+        component_fields = {
+            component_name : true,
+            component_date : true,
+            component_version : true
+        }
         POPUP.EDIT_COMPONENT = true;
     }
 
     const saveNewComponent = () => {
-        if(!new_component.component_name || !new_component.component_date) return;
+        if(!new_component.component_name){
+            component_fields.component_name = false;
+            return;
+        }else{
+            component_fields.component_name = true;
+        }
+        if(!new_component.component_date){
+            component_fields.component_date = false;
+            return;
+        }else{
+            component_fields.component_date = true;
+        }
+
+        if(new_component.component_type === "Omniscript" || new_component.component_type === "Integration Procedure" || new_component.component_type === "Flow"){
+            if(!new_component.component_version){
+                component_fields.component_version = false;
+                return;
+            }else{
+                component_fields.component_version = true;
+            }
+        }else{
+            component_fields.component_version = true;
+        }
+
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createComponentCallout(
             AUTH.currentUser.uid,
@@ -381,7 +626,30 @@
     }
 
     const updateComponent = () => {
-        if(!selected_component.component_name || !selected_component.component_name) return;
+        if(!selected_component.component_name){
+            component_fields.component_name = false;
+            return;
+        }else{
+            component_fields.component_name = true;
+        }
+        if(!selected_component.component_date){
+            component_fields.component_date = false;
+            return;
+        }else{
+            component_fields.component_date = true;
+        }
+
+        if(selected_component.component_type === "Omniscript" || selected_component.component_type === "Integration Procedure" || selected_component.component_type === "Flow"){
+            if(!selected_component.component_version){
+                component_fields.component_version = false;
+                return;
+            }else{
+                component_fields.component_version = true;
+            }
+        }else{
+            component_fields.component_version = true;
+        }
+
         fireEvent(EVENTS.SHOW_SPINNER,{});
         updateComponentCallout(
             AUTH.currentUser.uid,
@@ -417,27 +685,64 @@
     }
 
     const processDeleteComponent = (component_id) => {
-
-        fireEvent(EVENTS.SHOW_SPINNER,{});
-        deleteComponentCallout(
-            AUTH.currentUser.uid,
-            component_id
-        )
-        .then(res => {
-            for(let i=0;i<selected_list.list_components.length;i++){
-                if(selected_list.list_components[i].component_id === component_id){
-                    selected_list.list_components.splice(i,1);
+        if(selected_list.list_components.filter(component => component.component_id == component_id).length){
+            let sure = window.confirm(`Are you sure you want to delete the component?`) ;
+            if(!sure) return;
+            fireEvent(EVENTS.SHOW_SPINNER,{});
+            deleteComponentCallout(
+                AUTH.currentUser.uid,
+                component_id
+            )
+            .then(res => {
+                for(let i=0;i<selected_list.list_components.length;i++){
+                    if(selected_list.list_components[i].component_id === component_id){
+                        selected_list.list_components.splice(i,1);
+                    }
                 }
-            }
-            selected_list = selected_list;
-            store = store;
-            fireEvent(EVENTS.HIDE_SPINNER,{});
-        })
-        .catch(err => {
-            fireEvent(EVENTS.HIDE_SPINNER,{});
-        });
+                selected_list = selected_list;
+                store = store;
+                fireEvent(EVENTS.HIDE_SPINNER,{});
+            })
+            .catch(err => {
+                fireEvent(EVENTS.HIDE_SPINNER,{});
+            });
+        }
     }
     
+    const processViewData = ({new_view,current_view}) => {
+        if(new_view === "ALLTASKS"){
+            let tasks = [];
+            if(store && store.length){
+                store.forEach(list => {
+                    if(list.list_tasks && list.list_tasks.length){
+                        tasks.push(...list.list_tasks)
+                    }
+                })
+            }
+            fireEvent(EVENTS.SEND_VIEW_DATA,{
+                view : new_view,
+                data : tasks
+            });
+        }else if(new_view === "ALLCOMPONENTS"){
+            let components = [];
+            if(store && store.length){
+                store.forEach(list => {
+                    if(list.list_components && list.list_components.length){
+                        components.push(...list.list_components)
+                    }
+                })
+            }
+            fireEvent(EVENTS.SEND_VIEW_DATA,{
+                view : new_view,
+                data : components
+            });
+        }else{
+            fireEvent(EVENTS.SEND_VIEW_DATA,{
+                view : new_view,
+                data : null
+            });
+        }
+    }
 
     onMount( () => {
         
@@ -455,6 +760,7 @@
         registerListener(EVENTS.DELETE_COMPONENET,processDeleteComponent);
 
         registerListener(EVENTS.CLOSE_POPUP,processClosePopup);
+        registerListener(EVENTS.GET_VIEW_DATA,processViewData);
         
         fireEvent(EVENTS.SHOW_SPINNER,{});
 
@@ -480,6 +786,22 @@
         })
     });
 
+    onDestroy( () => {
+        unregisterListener(EVENTS.SELECT_LIST,processSelectListEvent);
+        unregisterListener(EVENTS.OPEN_NEW_LIST_POPUP,processOpenNewListPopup);
+        unregisterListener(EVENTS.OPEN_EDIT_LIST_POPUP,processEditListPopup);
+        unregisterListener(EVENTS.DELETE_LIST,processDeleteList);
+
+        unregisterListener(EVENTS.OPEN_NEW_TASK_POPUP,processOpenTaskPopup);
+        unregisterListener(EVENTS.OPEN_EDIT_TASK_POPUP,processEditTaskPopup);
+        unregisterListener(EVENTS.DELETE_TASK,processDeleteTask);
+
+        unregisterListener(EVENTS.OPEN_NEW_COMPONENT_POPUP,processOpenComponentPopup);
+        unregisterListener(EVENTS.OPEN_EDIT_COMPONENT_POPUP,processEditComponentPopup);
+        unregisterListener(EVENTS.DELETE_COMPONENET,processDeleteComponent);
+
+        unregisterListener(EVENTS.CLOSE_POPUP,processClosePopup);
+    })
 </script>
 
 <div class="app-container flex align-center flex-column">
@@ -496,21 +818,21 @@
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_list.list_name} onChange={handleNewListChange} data_field="list_name" />
+                    <Input label_class={list_fields.list_name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {list_fields.list_name ? '' : 'has-error'}" value={new_list.list_name} onChange={handleNewListChange} data_field="list_name" Required/>
                 </div>
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(new_list.list_status)} value={new_list.list_status} onChange={handleNewListChange} data_field="list_status" options={LIST_STATUS}/>
+                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(new_list.list_status)} value={new_list.list_status} onChange={handleNewListChange} data_field="list_status" options={LIST_STATUS} Required/>
                 </div>
                 
             </div>
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_list.list_start_date} onChange={handleNewListChange} data_field="list_start_date" />
+                    <Input label_class={list_fields.list_start_date ? '' : 'has-error'} data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {list_fields.list_start_date ? '' : 'has-error'}" value={new_list.list_start_date} onChange={handleNewListChange} data_field="list_start_date" Required={new_list.list_status == "In Progress" || new_list.list_status == "Completed" }/>
                 </div>
                 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_list.list_end_date} onChange={handleNewListChange} data_field="list_end_date" />
+                    <Input label_class={list_fields.list_end_date ? '' : 'has-error'} data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {list_fields.list_end_date ? '' : 'has-error'}" value={new_list.list_end_date} onChange={handleNewListChange} data_field="list_end_date" Required={new_list.list_status == "Completed"}/>
                 </div>
                 
             </div>
@@ -533,21 +855,21 @@
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_list.list_name} onChange={handleExistingListChange} data_field="list_name" />
+                    <Input label_class={list_fields.list_name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {list_fields.list_name ? '' : 'has-error'}" value={selected_list.list_name} onChange={handleExistingListChange} data_field="list_name" Required/>
                 </div>
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(selected_list.list_status)} value={selected_list.list_status} onChange={handleExistingListChange} data_field="list_status" options={LIST_STATUS}/>
+                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(selected_list.list_status)} value={selected_list.list_status} onChange={handleExistingListChange} data_field="list_status" options={LIST_STATUS} Required/>
                 </div>
                 
             </div>
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_list.list_start_date} onChange={handleExistingListChange} data_field="list_start_date" />
+                    <Input label_class={list_fields.list_start_date ? '' : 'has-error'} data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {list_fields.list_start_date ? '' : 'has-error'}" value={selected_list.list_start_date} onChange={handleExistingListChange} data_field="list_start_date" Required={selected_list.list_status == "In Progress" || selected_list.list_status == "Completed"}/>
                 </div>
                 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_list.list_end_date} onChange={handleExistingListChange} data_field="list_end_date" />
+                    <Input label_class={list_fields.list_end_date ? '' : 'has-error'} data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {list_fields.list_end_date ? '' : 'has-error'}" value={selected_list.list_end_date} onChange={handleExistingListChange} data_field="list_end_date" Required={selected_list.list_status == "Completed"}/>
                 </div>
                 
             </div>
@@ -570,21 +892,21 @@
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_task.task_name} onChange={handleNewTaskChange} data_field="task_name" />
+                    <Input label_class={task_fields.task_name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {task_fields.task_name ? '' : 'has-error'}" value={new_task.task_name} onChange={handleNewTaskChange} data_field="task_name" Required/>
                 </div>
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(new_task.task_status)} value={new_task.task_status} onChange={handleNewTaskChange} data_field="task_status" options={TASK_STATUS}/>
+                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(new_task.task_status)} value={new_task.task_status} onChange={handleNewTaskChange} data_field="task_status" options={TASK_STATUS} Required/>
                 </div>
                 
             </div>
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_task.task_start_date} onChange={handleNewTaskChange} data_field="task_start_date" />
+                    <Input label_class={task_fields.task_start_date ? '' : 'has-error'} data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {task_fields.task_start_date ? '' : 'has-error'}" value={new_task.task_start_date} onChange={handleNewTaskChange} data_field="task_start_date" Required={new_task.task_status == "In Progress" || new_task.task_status == "Completed"}/>
                 </div>
                 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_task.task_end_date} onChange={handleNewTaskChange} data_field="task_end_date" />
+                    <Input label_class={task_fields.task_end_date ? '' : 'has-error'} data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {task_fields.task_end_date ? '' : 'has-error'}" value={new_task.task_end_date} onChange={handleNewTaskChange} data_field="task_end_date" Required={new_task.task_status == "Completed"}/>
                 </div>
                 
             </div>
@@ -607,22 +929,22 @@
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_task.task_name} onChange={handleExistingTaskChange} data_field="task_name" />
+                    <Input label_class={task_fields.task_name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {task_fields.task_name ? '' : 'has-error'}" value={selected_task.task_name} onChange={handleExistingTaskChange} data_field="task_name" Required/>
                 </div>
                 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(selected_task.task_status)} value={selected_task.task_status} onChange={handleExistingTaskChange} data_field="task_status" options={TASK_STATUS}/>
+                    <Input data_type="field" label="Status" hasLabel width_class="width-full" type="select" classes={getStatusClass(selected_task.task_status)} value={selected_task.task_status} onChange={handleExistingTaskChange} data_field="task_status" options={TASK_STATUS} Required/>
                 </div>
                 
             </div>
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_task.task_start_date} onChange={handleExistingTaskChange} data_field="task_start_date" />
+                    <Input label_class={task_fields.task_start_date ? '' : 'has-error'} data_type="field" label="Start Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {task_fields.task_start_date ? '' : 'has-error'}" value={selected_task.task_start_date} onChange={handleExistingTaskChange} data_field="task_start_date" Required={selected_task.task_status == "In Progress"  || selected_task.task_status == "Completed"}/>
                 </div>
                 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_task.task_end_date} onChange={handleExistingTaskChange} data_field="task_end_date" />
+                    <Input label_class={task_fields.task_end_date ? '' : 'has-error'} data_type="field" label="End Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {task_fields.task_end_date ? '' : 'has-error'}" value={selected_task.task_end_date} onChange={handleExistingTaskChange} data_field="task_end_date" Required={selected_task.task_status == "Completed"}/>
                 </div>
                 
             </div>
@@ -643,18 +965,18 @@
         <div class="flex flex-column justify-center">
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_component.component_name} onChange={handleNewComponentChange} data_field="component_name" />
+                    <Input label_class={component_fields.component_name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {component_fields.component_name ? '' : 'has-error'}" value={new_component.component_name} onChange={handleNewComponentChange} data_field="component_name" Required/>
                 </div>
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Type" hasLabel width_class="width-full" type="select" classes="bg-transparent {getComponentTypeClass(new_component.component_type)}" value={new_component.component_type} onChange={handleNewComponentChange} data_field="component_type" options={COMPONENT_TYPE_LIST}/>
+                    <Input data_type="field" label="Type" hasLabel width_class="width-full" type="select" classes="bg-transparent {getComponentTypeClass(new_component.component_type)}" value={new_component.component_type} onChange={handleNewComponentChange} data_field="component_type" options={COMPONENT_TYPE_LIST} Required/>
                 </div>
             </div>
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={new_component.component_date} onChange={handleNewComponentChange} data_field="component_date" />
+                    <Input label_class={component_fields.component_date ? '' : 'has-error'} data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {component_fields.component_date ? '' : 'has-error'}" value={new_component.component_date} onChange={handleNewComponentChange} data_field="component_date" Required/>
                 </div>
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={new_component.component_version} onChange={handleNewComponentChange} data_field="component_version" />
+                    <Input label_class={component_fields.component_version ? '' : 'has-error'} data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent {component_fields.component_version ? '' : 'has-error'}" value={new_component.component_version} onChange={handleNewComponentChange} data_field="component_version" Required={new_component.component_type === "Omniscript" || new_component.component_type === "Integration Procedure" || new_component.component_type === "Flow"}/>
                 </div>
             </div>
             <div class="flex form-row">
@@ -672,20 +994,20 @@
 
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_component.component_name} onChange={handleExistingComponentChange} data_field="component_name" />
+                    <Input label_class={component_fields.component_name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {component_fields.component_name ? '' : 'has-error'}" value={selected_component.component_name} onChange={handleExistingComponentChange} data_field="component_name" Required/>
                 </div>
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Type" hasLabel width_class="width-full" type="select" classes="bg-transparent {getComponentTypeClass(selected_component.component_type)}" value={selected_component.component_type} onChange={handleExistingComponentChange} data_field="component_type" options={COMPONENT_TYPE_LIST}/>
+                    <Input data_type="field" label="Type" hasLabel width_class="width-full" type="select" classes="bg-transparent {getComponentTypeClass(selected_component.component_type)}" value={selected_component.component_type} onChange={handleExistingComponentChange} data_field="component_type" options={COMPONENT_TYPE_LIST} Required/>
                 </div>
                 
             </div>
             <div class="flex form-row">
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent" value={selected_component.component_date} onChange={handleExistingComponentChange} data_field="component_date" />
+                    <Input label_class={component_fields.component_date ? '' : 'has-error'} data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {component_fields.component_date ? '' : 'has-error'}" value={selected_component.component_date} onChange={handleExistingComponentChange} data_field="component_date" Required/>
                 </div>
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_component.component_version} onChange={handleExistingComponentChange} data_field="component_version" />
+                    <Input label_class={component_fields.component_version ? '' : 'has-error'} data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent {component_fields.component_version ? '' : 'has-error'}" value={selected_component.component_version} onChange={handleExistingComponentChange} data_field="component_version" Required={selected_component.component_type === "Omniscript" || selected_component.component_type === "Integration Procedure" || selected_component.component_type === "Flow"}/>
                 </div>
                 
             </div>

@@ -1,5 +1,4 @@
 <script>
-    import {signoutUser} from "./firebase";
     import { EVENTS , fireEvent } from "./EventManager";
 
     import Icon from "./utility/Icon.svelte";
@@ -19,29 +18,29 @@
 
 <main>
     <div class="sidebar fixed">
-        <div class="header">
+        <!-- <div class="header">
             <div class="flex align-center justify-space-between logo-container text-center">
-                <img class="logo" src="./logo.svg" alt="onelist"/>
+                <img class="logo" src="./sidebar-logo.svg" alt="onelist"/>
                 <div class="action-container text-center">
-                    <Icon type="danger" OnClick={signoutUser}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-50 feather feather-log-out">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                    </Icon>
-                    
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="content">
             <ul class="list-container">
                 <li class="flex align-center justify-end list-actions border-box relative">
-                    <Icon type="primary" OnClick={sendNewListEvent}>
+                    <div role="alert" aria-live="polite" aria-atomic="true" class="alert alert-success pointer" data-v-aa799a9e="" on:click={sendNewListEvent}>
+                        <div class="flex align-center justify-center alert-body box-border">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus">
+                                <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>New List</span>
+                        </div>
+                    </div>
+                    <!-- <Icon type="primary" OnClick={sendNewListEvent}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus">
                             <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                    </Icon>
+                    </Icon> -->
                 </li>
                 {#if lists && lists.length}
                     {#each lists as list}
@@ -73,20 +72,12 @@
         height: 100%;
         z-index: 1;
         left: 0;
+        margin-left: 5.25rem;
         box-shadow: 0 0 15px 0 rgb(34 41 47 / 5%);
     }
 
-    .sidebar .header{
-        padding: 1rem 0.3rem 0.3rem 1.64rem;
-        height: 2.5rem;
-    }
-
     .list-actions{
-        padding: .3rem;
-    }
-
-    .action-container{
-        color: var(--text-secondary-color);
+        padding: 0;
     }
 
     .sidebar .content{
@@ -123,10 +114,6 @@
         margin-right: 8px;
     }
 
-    .logo {
-        width: 7em;
-    }
-
     .item-content:hover{
         background-color: var(--quaternary-color);
     }
@@ -137,6 +124,27 @@
 
     ul{
         margin: 0;
+    }
+
+    .alert{
+        border: none;
+        padding: 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    .alert-primary{
+        background-color: rgba(115,103,240,.12);
+        color : var(--primary-color);
+    }
+
+    .alert-success{
+        background-color: #28c76f20;
+        color : #28c76f;
+    }
+
+    .alert-body{
+        padding: .71rem 1rem;
     }
 
 
