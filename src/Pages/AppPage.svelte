@@ -812,7 +812,7 @@
 </div>
 
 {#if POPUP.NEW_LIST}
-    <Popup header="New List" _popup_name="NEW_LIST" OnSave={saveNewList}>
+    <Popup header="New User Story" _popup_name="NEW_LIST" OnSave={saveNewList}>
         <div class="flex flex-column justify-center">
 
             <div class="flex form-row">
@@ -849,7 +849,7 @@
 {/if}
 
 {#if POPUP.EDIT_LIST}
-    <Popup header="Edit List" _popup_name="EDIT_LIST" OnSave={updateList}>
+    <Popup header="Edit User Story" _popup_name="EDIT_LIST" OnSave={updateList}>
         <div class="flex flex-column justify-center">
 
             <div class="flex form-row">
