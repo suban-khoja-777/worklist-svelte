@@ -183,102 +183,30 @@ body {
 	width: 55% !important;
 }
 
-.component_name{
-	width: 30% !important;
-}
 
-.component_type , .component_version , .component_date{
-	width: 15% !important;
-}
-
-.component_parent_name{
+.entry_column{
 	width: 25% !important;
 }
 
-.task_start_date,.task_end_date{
-	width: 15% !important;
-}
-
-.task_status{
-	width: 15% !important;
-	outline: none;
-	border-top: none;
-	border-left: none;
-	border-right: none;
-}
 
 /** Status Classes Start **/
 
-.Not-Started{
+.Pending{
 	background-color: #ea545520;
     color: #ea5455;
 }
 
-.In-Progress{
-	background-color: #ff9f4320;
-    color: #ff9f43;
-}
-
-.Completed{
+.Paid{
 	background-color: #28c76f20;
     color: #28c76f;
 }
 
+.duration{
+	background-color: #7367f020;
+	color: #7367f0;
+}
+
 /** Status Classes End **/
-
-/** Component Type Classes Start **/
-
-.Apex-Class{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.LWC{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.Omniscript{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.Integration-Procedure{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.Dataraptor{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.Custom-Field{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.Page-Layout{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.Lightning-Record-Type{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.Custom-Button{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-.Flow{
-	background-color: #7367f020;
-    color: #7367f0;
-}
-
-/** Component Type Classes End **/
 
 /** Badge Class Start **/
 .Bullet-Not-Started{

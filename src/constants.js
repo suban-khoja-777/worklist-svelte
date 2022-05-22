@@ -2,7 +2,7 @@
 export const APP_NAME = 'onelist';
 
 const API = {
-    BASE_ENDPOINT : 'https://worklist1-developer-edition.ap27.force.com/services/apexrest/api/v1/',
+    BASE_ENDPOINT : 'https://worklist1-935b.restdb.io/rest/work-entry',
     ENDPOINTS : {
         "getUserData" : 'getUserData',
         "getUserGeneralTasks" : 'getUserGeneralTasks',
@@ -23,238 +23,135 @@ const API = {
     }
 };
 
-const DEFAULTS = {
-    LIST_STATUS : "Not Started",
-    TASK_STATUS : "Not Started",
-    COMPONENT_TYPE : "Apex Class"
+const MONTH = {
+    "01" : "January",
+    "02" : "February",
+    "03" : "March",
+    "04" : "April",
+    "05" : "May",
+    "06" : "June",
+    "07" : "July",
+    "08" : "August",
+    "09" : "September",
+    "10" : "October",
+    "11" : "November",
+    "12" : "December"
+
 }
 
-const LIST_STATUS = [
-    "Not Started",
-    "In Progress",
-    "Completed",
+const DEFAULTS = {
+    PAYMENT_STATUS : "Pending",
+    DURATION : 60
+}
+
+const PAYMENT_STATUS = [
+    "Pending",
+    "Paid"
 ];
 
-const TASK_STATUS = [
-    "Not Started",
-    "In Progress",
-    "Completed",
-];
+const ENTRY_DURATIONS = [30,60,90,120,150];
 
-const COMPONENT_TYPE_LIST = [
-    "Apex Class",
-    "LWC",
-    "Omniscript",
-    "Integration Procedure",
-    "Dataraptor",
-    "Custom Field",
-    "Page Layout",
-    "Lightning Record Type",
-    "Custom Button",
-    "Flow"
-];
-
-const TASK_COLUMN = [
-    {
-        label : "Name",
-        key : "task_name",
-        show_in_list : true,
-        show_in_detail : true,
-        show_header : false,
-        allow_inline_edit : false,
-        field_type : "text"
-    },
-    {
-        label : "Start Date",
-        key : "task_start_date",
-        show_in_list : true,
-        show_in_detail : false,
-        show_header : true,
-        allow_inline_edit : true,
-        field_type : "date"
-    },
-    {
-        label : "End Date",
-        key : "task_end_date",
-        show_in_list : true,
-        show_in_detail : false,
-        show_header : true,
-        allow_inline_edit : true,
-        field_type : "date"
-    },
-    {
-        label : "Status",
-        key : "task_status",
-        show_in_list : true,
-        show_in_detail : false,
-        show_header : true,
-        allow_inline_edit : true,
-        field_type : "select"
-    },
-    {
-        label : "Notes",
-        key : "task_note",
-        show_in_list : false,
-        show_in_detail : true,
-        show_header : false,
-        allow_inline_edit : false,
-        field_type : "text-long"
-    }
-];
-
-const COMPONENT_COLUMN = [
-    {
-        label : "Name",
-        key : "component_name",
-        show_in_list : true,
-        show_in_detail : true,
-        show_header : false,
-        allow_inline_edit : false,
-        field_type : "text"
-    },
-    {
-        label : "Version",
-        key : "component_version",
-        show_in_list : true,
-        show_in_detail : false,
-        show_header : true,
-        allow_inline_edit : true,
-        field_type : "text"
-    },
+const ENTRY_COLUMN = [
     {
         label : "Date",
-        key : "component_date",
-        show_in_list : true,
-        show_in_detail : false,
-        show_header : true,
-        allow_inline_edit : true,
-        field_type : "text"
-    },
-    {
-        label : "Parent Component",
-        key : "component_parent_name",
+        key : "start_date",
         show_in_list : true,
         show_in_detail : true,
         show_header : true,
-        allow_inline_edit : true,
-        field_type : "text"
+        allow_inline_edit : false,
+        field_type : "date"
     },
     {
-        label : "Type",
-        key : "component_type",
+        label : "Start Time",
+        key : "start_time",
         show_in_list : true,
         show_in_detail : false,
+        show_header : true,
+        allow_inline_edit : true,
+        field_type : "time"
+    },
+    {
+        label : "Duration",
+        key : "duration",
+        show_in_list : true,
+        show_in_detail : false,
+        show_header : true,
+        allow_inline_edit : true,
+        field_type : "select"
+    },
+    {
+        label : "Payment",
+        key : "payment_status",
+        show_in_list : true,
+        show_in_detail : true,
         show_header : true,
         allow_inline_edit : true,
         field_type : "select"
     }
 ];
 
-const LIST_COLUMN = [
-    {
-        label : "Name",
-        key : "list_name",
-        show_in_list : true,
-        show_in_detail : true,
-        show_header : false,
-        allow_inline_edit : false,
-        field_type : "text"
-    },
-    {
-        label : "Start Date",
-        key : "list_start_date",
-        show_in_list : false,
-        show_in_detail : true,
-        show_header : false,
-        allow_inline_edit : true,
-        field_type : "date"
-    },
-    {
-        label : "End Date",
-        key : "list_end_date",
-        show_in_list : false,
-        show_in_detail : true,
-        show_header : false,
-        allow_inline_edit : true,
-        field_type : "date"
-    },
-    {
-        label : "Status",
-        key : "list_status",
-        show_in_list : false,
-        show_in_detail : true,
-        show_header : false,
-        allow_inline_edit : false,
-        field_type : "select"
-    },
-    {
-        label : "Description",
-        key : "list_description",
-        show_in_list : false,
-        show_in_detail : true,
-        show_header : false,
-        allow_inline_edit : false,
-        field_type : "text-long"
-    }
-];
-
-const getStatusClass = (_status) => {
-    if(!_status) return '';
-    return _status.replace(' ','-');
-}
-
-const getComponentTypeClass = (_type) => {
+const getEntryPaymentStatusClass = (_type) => {
     if(!_type) return '';
     return _type.replace(' ','-');
 }
 
-const getBulletClass = (_status) => {
-    if(!_status) return '';
-    return 'Bullet-'+_status.replace(' ','-');
+const formatDateString = (_dateString) =>{
+    if(!_dateString) return '';
+    let dateArr = _dateString.split('-');
+    return dateArr[2] + ' ' + MONTH[dateArr[1]] + ' ' + dateArr[0]; 
 }
 
-const encoding_decoding = (str,key) => {
-    let enc = "";
-    let encodedKey = "";
-    // make sure that input is string
-    str = str.toString();
-    for (let i = 0; i < key.length; i++) {
-        encodedKey += key.charCodeAt(i);
-    }
-    encodedKey = ""+encodedKey;
-    encodedKey = encodedKey.substr(0,10);
-    for (let i = 0; i < str.length; i++) {
-        // create block
-        const a = str.charCodeAt(i);
-        // bitwise XOR
-        const b = a ^ encodedKey;
-        enc = enc + String.fromCharCode(b);
-    }
-    return enc;
-}   
+const convertDateToString = (_date) =>{
+    if(!_date) return '';
+    let year = _date.getFullYear();
+    let month = _date.getMonth() + 1;
+    let date = _date.getDate();
+    date = (date < 10) ? '0' + date : date;
+    month = (month < 10) ? '0' + month : month;
+    return year + '-' + month + '-' + date; 
+}
 
+const convertDateToTimeString = (_date) =>{
+    if(!_date) return '';
+    let hour = _date.getHours();
+    let minute = _date.getMinutes();
+    let second = _date.getSeconds();
+    hour = (hour < 10) ? '0' + hour : hour;
+    minute = (minute < 10) ? '0' + minute : minute;
+    second = (second < 10) ? '0' + second : second;
+    return hour + ':' + minute + ':' + second; 
+}
+
+const formatTimeString = (_TimeString) =>{
+    if(!_TimeString) return '';
+    let timeArr = _TimeString.split(':');
+    let _hour = Number(timeArr[0]);
+    const isAMPM = _hour >= 12 ? 'PM' : 'AM';
+    _hour = (_hour > 12) ? _hour - 12 : _hour;
+    _hour = (_hour < 10) ? '0' + _hour : _hour;
+    return _hour + ':' + timeArr[1] + ':' + timeArr[2] + ' ' + isAMPM; 
+}
 
 Object.freeze(API);
-Object.freeze(LIST_STATUS);
-Object.freeze(TASK_STATUS);
-Object.freeze(TASK_COLUMN);
-Object.freeze(LIST_COLUMN);
-Object.freeze(COMPONENT_TYPE_LIST);
-Object.freeze(COMPONENT_COLUMN);
+Object.freeze(ENTRY_COLUMN);
 Object.freeze(DEFAULTS);
+Object.freeze(PAYMENT_STATUS);
+Object.freeze(MONTH);
+Object.freeze(ENTRY_DURATIONS);
 
 export {
     API,
-    LIST_STATUS,
-    TASK_COLUMN,
-    TASK_STATUS,
-    COMPONENT_COLUMN,
-    LIST_COLUMN,
-    COMPONENT_TYPE_LIST,
+    ENTRY_COLUMN,
     DEFAULTS,
-    getStatusClass,
-    getComponentTypeClass,
-    getBulletClass
+    PAYMENT_STATUS,
+    getEntryPaymentStatusClass,
+    formatDateString,
+    formatTimeString,
+    convertDateToString,
+    convertDateToTimeString,
+    ENTRY_DURATIONS
 };
+
+
 
 

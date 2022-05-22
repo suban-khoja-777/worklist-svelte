@@ -23,7 +23,7 @@
 {/if}
 
 {#if type === 'select'}
-    <select class="column flex grow border-bottom-primary text-primary {classes} {width_class} border-box text-center pointer border-box justify-center status-column" {value} {name} on:change={onChange} data-type={data_type} data-field={data_field} disabled={readOnly}>
+    <select class="column flex grow border-bottom-primary text-primary {classes} {width_class} border-box text-center pointer border-box justify-center status-column {data_field}" {value} {name} on:change={onChange} data-type={data_type} data-field={data_field} disabled={readOnly}>
         {#each options as status}
             <option value={status} class="option bg-white text-primary">{status}</option>
         {/each}
@@ -71,7 +71,7 @@
         color: var(--text-secondary-color);
     }
 
-    input[type="date"]{
+    input[type="date"] , input[type="time"]{
         border: none;
         outline: none;
         flex-shrink: 0.75;
@@ -112,7 +112,7 @@
         border-radius: .357rem;
     }
 
-    input[data-type="field"][type="date"]{
+    input[data-type="field"][type="date"] , input[data-type="field"][type="time"]{
         border: 1px solid var(--border-primary-color);
         background-color: var(--secondary-color);
         color : var(--text-tertiary-color);

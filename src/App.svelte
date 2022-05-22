@@ -2,10 +2,6 @@
 	import { AUTH } from "./firebase";
 	import LoginPage from "./Pages/LoginPage.svelte";
 	import AppPage from "./Pages/AppPage.svelte";
-	import GeneralTasksPage from "./Pages/GeneralTasksPage.svelte";
-	import Navigation from "./Navigation.svelte";
-	import AllTasksPage from "./Pages/AllTasksPage.svelte";
-	import AllComponentsPage from "./Pages/AllComponentsPage.svelte";
 	import LoadSpinner from "./utility/LoadSpinner.svelte";
 	import ProcessSpinner from "./utility/ProcessSpinner.svelte";
     import {registerListener , unregisterListener, fireEvent, EVENTS} from './EventManager';
@@ -93,16 +89,7 @@
 	
 	{#if !showInitLoad}
 		{#if currentUser}
-			<Navigation currentView={view}/>
-			{#if view == "ALLTASKS"}	
-				<AllTasksPage tasks={all_tasks}/>
-				{:else if view == "ALLCOMPONENTS"}
-				<AllComponentsPage components={all_components}/>
-				{:else if view == "GENERALTASKS"}
-				<GeneralTasksPage />
-				{:else}
-				<AppPage/>
-			{/if}
+			<AppPage/>
 			{:else}
 			<LoginPage />
 		{/if}
