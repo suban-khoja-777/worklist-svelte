@@ -1,6 +1,6 @@
 <script>
     import { onMount , onDestroy} from "svelte";
-    import {getUserDataCallout , createTimeEntry , deleteTimeEntry, updateEntryStatus } from '../api';
+    import {getAllWorkEntry , createTimeEntry , deleteTimeEntry, updateEntryStatus ,createClient,deleteClient} from '../api';
     import { AUTH } from "../firebase";
     import Input from "../utility/Input.svelte";
     import Popup from "../utility/Popup.svelte";
@@ -10,7 +10,6 @@
     import {getEntryPaymentStatusClass , DEFAULTS , PAYMENT_STATUS , ENTRY_DURATIONS , convertDateToString , convertDateToTimeString} from "../constants";
 
     let store = [];
-    let clients = new Set();
     let work_entries = [];
 
     const POPUP = {
@@ -24,11 +23,9 @@
     }
     
     let selected_client;
-    let backup_selected_client;
 
     let new_client = {
-        name : "",
-        information : ""
+        Name : ""
     };
 
     let client_fields = {
@@ -46,60 +43,37 @@
         POPUP.NEW_CLIENT = true;
     }
 
-    const processSelectClientEvent = (client_name) => {
-        client_fields = {
-            name : true
-        }
-        selected_client = client_name;
-        work_entries = store.filter(entry => entry.client === selected_client);
+    const processSelectClientEvent = (client) => {
+        selected_client = client
+        work_entries = store.filter(entry => entry.client[0]._id === client._id);
     }
 
     const saveNewClient = () => {
-        if(!new_client.name){
+        if(!new_client.Name){
             client_fields.name = false;
             return;
         }else{
             client_fields.name = true;
         }
-        
-        clients.push(
-            new_client.name
-        );
-        new_client = {
-            name : ""
-        };
-        store = store;
-        clients = clients;
-        fireEvent(EVENTS.CLOSE_POPUP,'NEW_CLIENT');
-        
-    }
-
-    function processEntryList () {
-        let sure = window.confirm(`Are you sure you want to delete ${selected_client.name} ?`);
-        if(!sure) return;
         fireEvent(EVENTS.SHOW_SPINNER,{});
-        deleteListCallout(
-            AUTH.currentUser.uid,
-            selected_list.list_id
-        )
+        createClient(new_client)
         .then(res => {
-            for(let i=0;i<lists.length;i++){
-                if(lists[i].list_id === selected_list.list_id){
-                    lists.splice(i,1);
-                }
-            }
-            selected_list = null;
-            backup_selected_list = null;
-            store = store;
-            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.SEND_NEW_CLIENT,{
+                _id : res._id,
+                Name : res.Name
+            });
         })
         .catch(err => {
-            fireEvent(EVENTS.HIDE_SPINNER,{});
+
         });
 
+        new_client = {
+            Name : ""
+        };
+        
+        fireEvent(EVENTS.CLOSE_POPUP,'NEW_CLIENT');
     }
 
-    
     let selected_entry;
     let backup_selected_entry;
 
@@ -118,10 +92,6 @@
 
     const handleNewEntryChange = (e) => {
         new_entry[e.target.dataset.field] = e.target.value;
-    }
-
-    const handleExistingComponentChange = (e) => {
-        selected_component[e.target.dataset.field] = e.target.value;
     }
 
     const processOpenEntryPopup = () => {
@@ -223,65 +193,6 @@
         });
     }
 
-    const updateComponent = () => {
-        if(!selected_component.component_name){
-            component_fields.component_name = false;
-            return;
-        }else{
-            component_fields.component_name = true;
-        }
-        if(!selected_component.component_date){
-            component_fields.component_date = false;
-            return;
-        }else{
-            component_fields.component_date = true;
-        }
-
-        if(selected_component.component_type === "Omniscript" || selected_component.component_type === "Integration Procedure" || selected_component.component_type === "Flow"){
-            if(!selected_component.component_version){
-                component_fields.component_version = false;
-                return;
-            }else{
-                component_fields.component_version = true;
-            }
-        }else{
-            component_fields.component_version = true;
-        }
-
-        fireEvent(EVENTS.SHOW_SPINNER,{});
-        updateComponentCallout(
-            AUTH.currentUser.uid,
-            selected_component.component_id,
-            selected_component.component_name,
-            JSON.stringify({
-                type : selected_component.component_type,
-                version : selected_component.component_version,
-                parent_component : selected_component.component_parent_name,
-                date : selected_component.component_date
-            })
-        )
-        .then(res => {
-            selected_component = selected_component;
-            backup_selected_component = JSON.parse(JSON.stringify(selected_component));
-
-            const selected_component_index = selected_list.list_components.findIndex(component => component.component_id === selected_component.component_id);
-            selected_list.list_components.splice(selected_component_index,1,selected_component);
-            
-            selected_list = selected_list;
-
-            const selected_list_index = store.findIndex(list => list.list_id === selected_list.list_id);
-            store.splice(selected_list_index,1,selected_list);
-            
-            store = store;
-
-            fireEvent(EVENTS.HIDE_SPINNER,{});
-            fireEvent(EVENTS.CLOSE_POPUP,'EDIT_COMPONENT');
-        })
-        .catch(err => {
-            fireEvent(EVENTS.HIDE_SPINNER,{});
-        });
-    }
-
     const processDeleteEntry = (entry_id) => {
         let sure = window.confirm(`Are you sure you want to delete the entry?`) ;
         if(!sure) return;
@@ -304,10 +215,26 @@
         });
     }
 
+    const processDeleteClient = (client_id) => {
+        let sure = window.confirm(`Are you sure you want to delete the client?`) ;
+        if(!sure) return;
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        deleteClient(client_id)
+        .then(res => {
+            selected_client = null;
+            fireEvent(EVENTS.SEND_REMOVE_CLIENT,client_id);
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+
     onMount( () => {
         
         registerListener(EVENTS.SELECT_CLIENT,processSelectClientEvent);
         registerListener(EVENTS.OPEN_NEW_CLIENT_POPUP,processOpenNewClientPopup);
+        registerListener(EVENTS.DELETE_CLIENT,processDeleteClient);
 
         registerListener(EVENTS.OPEN_NEW_ENTRY_POPUP,processOpenEntryPopup);
         registerListener(EVENTS.OPEN_EDIT_ENTRY_POPUP,processEditEntryPopup);
@@ -318,17 +245,11 @@
         
         fireEvent(EVENTS.SHOW_SPINNER,{});
 
-        getUserDataCallout()
+        getAllWorkEntry()
         .then(res => {
             if(res && res && res.length){
                 store = res;
                 console.log(store);
-                for(let i=0;i<store.length;i++){
-                    clients.add(
-                        store[i].client
-                    );
-                }
-                clients = [...clients];
                 store = store;
                 fireEvent(EVENTS.HIDE_SPINNER,{});
             }else{
@@ -343,7 +264,7 @@
     onDestroy( () => {
         unregisterListener(EVENTS.SELECT_CLIENT,processSelectClientEvent);
         unregisterListener(EVENTS.OPEN_NEW_CLIENT_POPUP,processOpenNewClientPopup);
-
+        unregisterListener(EVENTS.DELETE_CLIENT,processDeleteClient);
         unregisterListener(EVENTS.OPEN_NEW_ENTRY_POPUP,processOpenEntryPopup);
         unregisterListener(EVENTS.OPEN_EDIT_ENTRY_POPUP,processEditEntryPopup);
         unregisterListener(EVENTS.UPDATE_ENTRY_STATUS,processUpdateEntryStatus);
@@ -354,7 +275,7 @@
 </script>
 
 <div class="app-container flex align-center flex-column">
-    <Sidebar {clients} {selected_client}/>
+    <Sidebar/>
     {#if selected_client}
         <Container {selected_client} {work_entries}/>
     {/if}
@@ -365,7 +286,7 @@
         <div class="flex flex-column justify-center">
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input label_class={client_fields.name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.name ? '' : 'has-error'}" value={new_client.name} onChange={handleNewClientChange} data_field="name" Required/>
+                    <Input label_class={client_fields.name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.name ? '' : 'has-error'}" value={new_client.Name} onChange={handleNewClientChange} data_field="Name" Required/>
                 </div>
             </div>
         </div>

@@ -1,16 +1,55 @@
 <script>
-    import { EVENTS , fireEvent } from "./EventManager";
+    import { onMount , onDestroy} from "svelte";
+    import { EVENTS , fireEvent,registerListener,unregisterListener } from "./EventManager";
+    import { getClients } from "./api";
     import {signoutUser} from './firebase'
-    export let clients = [];
-    export let selected_client;
+    let clients = [];
+    let selected_client_id;
 
     const sendSelectClientEvent = (evt) => {
-        fireEvent(EVENTS.SELECT_CLIENT,evt.currentTarget.dataset.name);
+        fireEvent(EVENTS.SELECT_CLIENT,clients.filter(client => client._id == evt.currentTarget.dataset.id)[0]);
+        selected_client_id = evt.currentTarget.dataset.id;
     } 
 
     const sendNewClientEvent = (evt) => {
         fireEvent(EVENTS.OPEN_NEW_CLIENT_POPUP,null);
     }
+
+    const processNewClientEvent = (_client) => {
+        clients.push(_client);
+        clients = clients;
+        fireEvent(EVENTS.HIDE_SPINNER,{});
+    }
+
+    const processRemoveClientEvent = (client_id) => {
+        clients = clients.filter(client => client._id != client_id);
+        selected_client_id = null;
+    }
+
+    onMount( () => {
+        
+        registerListener(EVENTS.SEND_NEW_CLIENT,processNewClientEvent);
+        registerListener(EVENTS.SEND_REMOVE_CLIENT,processRemoveClientEvent);
+        
+        getClients()
+        .then(res => {
+            if(res && res && res.length){
+                clients = res;
+                console.log(clients);
+                fireEvent(EVENTS.HIDE_SPINNER,{});
+            }else{
+                fireEvent(EVENTS.HIDE_SPINNER,{});
+            }
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        })
+    });
+
+    onDestroy(() => {
+        unregisterListener(EVENTS.SEND_NEW_CLIENT,processNewClientEvent);
+        unregisterListener(EVENTS.SEND_REMOVE_CLIENT,processRemoveClientEvent);
+    })
 
 </script>
 
@@ -31,13 +70,13 @@
                 <br/>
                 {#if clients && clients.length}
                     {#each clients as client}
-                        <li class="flex align-center pointer justify-start list-item border-box relative" data-name={client} on:click={sendSelectClientEvent}>
-                            <span class="item-content flex align-center border-box { selected_client == client ? 'active' : ''}"> 
+                        <li class="flex align-center pointer justify-start list-item border-box relative" data-id={client._id} on:click={sendSelectClientEvent}>
+                            <span class="item-content flex align-center border-box { selected_client_id == client._id ? 'active' : ''}"> 
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="list-logo align-center feather feather-file-text">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
-                                <span class="align-center item-name"> {client} </span>
+                                <span class="align-center item-name"> {client.Name} </span>
                             </span>
                         </li>
                     {/each}
@@ -65,7 +104,7 @@
 <style>
 
     .sidebar{
-        width: 20vw;
+        width: 17vw;
         background-color: var(--secondary-color);
         height: 100%;
         z-index: 1;
@@ -114,8 +153,10 @@
 	    border: 1px solid var(--primary-color);
     }
 
-    .item-content.active{
-        background : var(--primary-color);
+    .item-content.active{       
+        background-color: #7367f020;
+        color: #7367f0;
+	    border: 1px solid #7367f0;
     }
 
     ul{

@@ -2,24 +2,10 @@
 export const APP_NAME = 'onelist';
 
 const API = {
-    BASE_ENDPOINT : 'https://worklist1-935b.restdb.io/rest/work-entry',
+    BASE_ENDPOINT : 'https://worklist1-935b.restdb.io/rest/',
     ENDPOINTS : {
-        "getUserData" : 'getUserData',
-        "getUserGeneralTasks" : 'getUserGeneralTasks',
-        "createList" : "createList",
-        "updateList" : "updateList",
-        "deleteList" : "deleteList",
-        "createTask" : "createTask",
-        "updateTask" : "updateTask",
-        "deleteTask" : "deleteTask",
-        "createGeneralTask" : "createGeneralTask",
-        "updateGeneralTask" : "updateGeneralTask",
-        "deleteGeneralTask" : "deleteGeneralTask",
-        "deleteBulkGeneralTask" : "deleteBulkGeneralTask",
-        "createComponent" : "createComponent",
-        "updateComponent" : "updateComponent",
-        "deleteComponent" : "deleteComponent",
-        "exportListComponents":"exportListComponents"
+        "work_entry" : 'work-entry',
+        "client" : 'client'
     }
 };
 

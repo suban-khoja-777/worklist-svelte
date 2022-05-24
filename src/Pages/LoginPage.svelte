@@ -140,9 +140,6 @@
 
         <div class="right">
             <div class="form-container flex justify-center flex-column login-form">
-                <header class="flex align-center justify-end">
-                    <Button label="Donate" type="danger"/>
-                </header>
                 <div class="sub-container grow flex justify-center flex-row">
                     <div class="form form-right flex justify-center flex-column">
                         <span class="title flex align-center text-bold text-primary">

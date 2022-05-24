@@ -1,23 +1,19 @@
 <script>
     import { ENTRY_COLUMN } from "./constants";
     import { EVENTS , fireEvent } from "./EventManager";
-    import { AUTH } from "./firebase";
     import Component from "./Component.svelte";
-    import { exportListComponentsCallout } from "./api";
+    
     import Icon from "./utility/Icon.svelte";
     
     export let work_entries = [];
-    export let selected_client = "";
+    export let selected_client;
 
     const sendNewEntryEvent = () => {
-        console.log('sendNewEntryEvent Fired');
         fireEvent(EVENTS.OPEN_NEW_ENTRY_POPUP,{});
     }
 
-    const exportTimeEntries = () => {
-        const data = JSON.stringify(work_entries);
-        const file_name = ' Time Entry Export '+new Date().toISOString();
-        fireEvent(EVENTS.SHOW_SPINNER,{});
+    const sendDeleteClientEVent = () => {
+        fireEvent(EVENTS.DELETE_CLIENT,selected_client._id);
     }
 
 </script>
@@ -28,8 +24,18 @@
             
             <div class="flex list-dates grow align-center">
                 <span class="column flex justify-start border-box text-bold pointer list_name align-center">
-                    <span class="list_name">{selected_client}</span>
+                    <span class="list_name">{selected_client.Name}</span>
                 </span>
+            </div>
+
+            <div class="flex">
+                
+                <Icon type="danger" OnClick={sendDeleteClientEVent}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-75 feather feather-trash">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </Icon>
             </div>
 
         </div>
