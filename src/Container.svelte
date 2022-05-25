@@ -63,7 +63,7 @@
                 <li class="columns flex justify-space-between align-center text-white text-bold">
                     {#each ENTRY_COLUMN as column,index}
                         {#if column.show_in_list}
-                            <span class="column flex grow border-box text-bold entry_column {index == 0 ? 'justify-start' : 'justify-center'}">{ column.show_header ? column.label : ''}</span>    
+                            <span class="column flex grow border-box text-bold entry_column {index == 0 ? 'justify-center' : 'justify-center'}">{ column.show_header ? column.label : ''}</span>    
                         {/if}
                     {/each}
                 </li>
@@ -119,11 +119,10 @@
     .columns{
         width: 100%;
         list-style: none;
-        padding-left: 1rem;
     }
 
     .column{
-        padding: 0.5rem;
+        padding: 0.5rem 1.5rem;
         width: 95%;
         color: #b5b5c3;
     }

@@ -25,33 +25,33 @@
     let selected_client;
 
     let new_client = {
-        Name : ""
+        Name : "",
+        Rate : ""
     };
 
     let client_fields = {
         name : true,
+        rate : true
     }
 
     const handleNewClientChange = (e) => {
-        if(e.target.dataset.field === 'duration'){
-            new_client = e.target.value;
+        if(e.target.dataset.field === 'Rate'){
+            new_client[e.target.dataset.field] = Number(e.target.value);
         }else
             new_client[e.target.dataset.field] = e.target.value;
     }
 
     const processOpenNewClientPopup = () => {
         client_fields = {
-            name : true
+            name : true,
+            rate : true
         }
         POPUP.NEW_CLIENT = true;
     }
 
     const processSelectClientEvent = (client) => {
         selected_client = client;
-        console.log('selected_client ',selected_client);
         work_entries = store.filter(entry => entry.client[0]._id === client._id);
-        
-        console.log('work_entries ',work_entries);
     }
 
     const saveNewClient = () => {
@@ -61,12 +61,19 @@
         }else{
             client_fields.name = true;
         }
+        if(!new_client.Rate){
+            client_fields.rate = false;
+            return;
+        }else{
+            client_fields.rate = true;
+        }
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createClient(new_client)
         .then(res => {
             fireEvent(EVENTS.SEND_NEW_CLIENT,{
                 _id : res._id,
-                Name : res.Name
+                Name : res.Name,
+                Rate : res.Rate
             });
         })
         .catch(err => {
@@ -74,7 +81,8 @@
         });
 
         new_client = {
-            Name : ""
+            Name : "",
+            Rate : "",
         };
         
         fireEvent(EVENTS.CLOSE_POPUP,'NEW_CLIENT');
@@ -196,6 +204,7 @@
                 start_time : new_entry.start_time,
                 payment_status : new_entry.payment_status,
                 duration : new_entry.duration,
+                Amount : res.Amount
             });
 
             store.push({
@@ -205,6 +214,7 @@
                 start_time : new_entry.start_time,
                 payment_status : new_entry.payment_status,
                 duration : new_entry.duration,
+                Amount : res.Amount
             });
 
             new_entry = {
@@ -324,6 +334,9 @@
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
                     <Input label_class="dark {client_fields.name ? '' : 'has-error'}" data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.name ? '' : 'has-error'}" value={new_client.Name} onChange={handleNewClientChange} data_field="Name" Required/>
+                </div>
+                <div class="flex flex-column form-column grow">
+                    <Input label_class="dark {client_fields.rate ? '' : 'has-error'}" data_type="field" label="Rate (Per Hour)" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.rate ? '' : 'has-error'}" value={new_client.Rate} onChange={handleNewClientChange} data_field="Rate" Required/>
                 </div>
             </div>
         </div>

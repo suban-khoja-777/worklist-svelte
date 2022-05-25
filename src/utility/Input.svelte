@@ -43,6 +43,7 @@
         border-radius: 0.625rem;
         outline: none;
         border : none;
+        text-align: center;
     }
 
     label {

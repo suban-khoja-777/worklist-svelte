@@ -73,6 +73,15 @@ const ENTRY_COLUMN = [
         show_header : true,
         allow_inline_edit : true,
         field_type : "select"
+    },
+    {
+        label : "Amount",
+        key : "Amount",
+        show_in_list : true,
+        show_in_detail : false,
+        show_header : true,
+        allow_inline_edit : false,
+        field_type : "text"
     }
 ];
 

@@ -39,7 +39,7 @@
 
 <li class="columns flex justify-space-between align-center border-box">
 
-    <span class="column flex grow justify-center border-box text-bold pointer entry_column justify-start align-center">
+    <span class="column flex grow justify-center border-box text-bold pointer entry_column justify-center align-center">
         <Input label="Name"  width_class="width-full" type="text" classes="bg-transparent" value={formatDateString(entry.start_date)} data_field="start_date" readOnly/>
         <span class="row-actions">
             {#if actions.includes('EDIT')}
@@ -78,6 +78,9 @@
     </span>
     <span class="column column-select flex grow justify-center border-box text-bold pointer entry_column justify-center align-stretch">
         <Input label="Payment Status" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 {getEntryPaymentStatusClass(entry.payment_status)}" value={entry.payment_status} data_field="payment_status" options={PAYMENT_STATUS} onChange={sendChangeStatusEvent}/>
+    </span>
+    <span class="column flex grow justify-center border-box text-bold pointer entry_column  justify-center align-center">
+        <Input label="Amount" width_class="width-full" type="text" classes="bg-transparent text-center text-boldest" value="${entry.Amount}" data_field="Amount" readOnly/>
     </span>
          
 </li>
