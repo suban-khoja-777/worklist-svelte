@@ -31,7 +31,7 @@
             <slot/>
         </div>
         {#if showActions}
-            <footer class="modal-footer flex flex-end align-center">
+            <footer class="modal-footer flex justify-end align-center">
                 {#if showSave}
                     <Button onClick={OnSave} label={saveLabel} type="primary"/>
                 {/if}
@@ -47,7 +47,7 @@
         width: 100vw;
         left: 0;
         top: 0;
-        background: #242a38;
+        background: #fff;
         opacity: .75;
         z-index: 3;
     }
@@ -63,14 +63,17 @@
     .modal{
         width: 40vw;
         height: auto;
-        background-color: var(--secondary-color);
+        background-color: white;
         z-index: 9;
+        border: 2px solid #EFF2F5;
+        border-radius: 0.65rem;
     }
 
     .modal-header{
-        background-color: var(--quaternary-color);
+        background-color: white;
         padding: 1rem;
-        color: var(--text-secondary-color);
+        color: #181C32;
+        border-bottom: 1px solid #EFF2F5;
     }
 
     .modal-header > h3{
@@ -84,9 +87,8 @@
 
     .modal-footer{
         padding: 1rem;
-        border-top:  1px solid rgba(34,41,47,.05);
-        background-color: var(--secondary-color);
-        border-color: var(--border-secondary-color);
+        border-top: 1px solid #EFF2F5;
+        background-color: white;
     }
 
 </style>

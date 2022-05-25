@@ -59,9 +59,9 @@ const fireEvent = (eventName, payload) => {
             try {
                 listener.callback.call(this,payload);
             } catch (error) {
-                console.error('@eventName : ',eventName) &&
-                console.error('@listener : ',listener) &&
-                console.error('@payload : ',payload) &&
+                console.error('@eventName : ',eventName);
+                console.error('@listener : ',listener);
+                console.error('@payload : ',payload);       
                 console.error('@error : ',error)
             }
         });

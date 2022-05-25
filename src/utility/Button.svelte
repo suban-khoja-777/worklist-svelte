@@ -13,7 +13,7 @@
     button{
         border: none;
         outline: none;
-        padding: 0.5rem 2rem;
+        padding: .8rem 2rem;
         border-radius: 4px;
         display: inline-block;
         vertical-align: middle;
@@ -22,8 +22,8 @@
     }
 
     button[data-type="primary"]{
-        background-color: var(--btn-primary-color);
-        border : 2px solid var(--btn-primary-color);
+        background-color: #009EF7;
+        border : 1px solid #009EF7;
         color: white;
     }
 

@@ -40,23 +40,10 @@
         height: 100vh;
     }
 
-    .right{
-        width: 30%;
+    .main{
+        width: 100%;
         height: 100%;
-        background-color: var(--secondary-color);
-    }
-
-    .left{
-        width: 70%;
-        height: 100%;
-    }
-
-    .app-header{
-        padding: 1.5em 1em;
-    }
-
-    .right header{
-        padding: 1.5em 1em;
+        
     }
 
     .app-footer{
@@ -74,40 +61,25 @@
         color: white;
     }
 
-    .logo {
-        width: 8em;
-        margin: 0 5px;
-    }
-
     .form-container{
         height: 100vh;
-    }
-
-    .form {
-        padding: 0 3rem;
-        width: 25%;
     }
 
     .highlight{
         color: var(--secondary-color);
     }
 
-    .home{
-        width: 95%;
-        height: 95%;
-    }
-
     .form{
-        width: 100%;
-        height: 100%;
+        width: 400px;
+        height: 400px;
+        background: white;
+        border-radius: 5px;
+        padding: 0 3rem;
+        box-shadow: 0 4px 24px 0 rgb(34 41 47 / 10%);
     }
 
     .sub-container{
         width: 100%;
-    }
-
-    .illustration-container{
-        height: 80%;
     }
     
     .dev-name{
@@ -116,44 +88,27 @@
         border-radius: 5px;
     }
 
+    h1{
+        margin: 0;
+    }
     
 
 </style>
 
 <div class="flex flex-row container">
-    
-        <div class="left">
-            <header class="app-header flex justify-space-between align-center">
-                <span class="app-name flex align-center text-bold text-primary">
-                    <img class="logo" src="./logo.svg" alt="worklist"/>
-                </span>
-            </header>
-            
-            <div class="illustration-container flex justify-center flex-row align-center grow">
-                <div class="flex justify-center flex-column align-center tagline-container">
-                    <img class="home" src="./login.svg" alt="worklist"/>    
-                </div>
-            </div>
-    
-            
-        </div>
 
-        <div class="right">
+        <div class="main">
             <div class="form-container flex justify-center flex-column login-form">
-                <div class="sub-container grow flex justify-center flex-row">
+                <div class="sub-container grow flex justify-center align-center flex-row">
                     <div class="form form-right flex justify-center flex-column">
-                        <span class="title flex align-center text-bold text-primary">
-                            Welcome to worklist
-                        </span>
-                        <br/>
-                        <span class="sub-title flex align-center text-primary">
-                            Please sign-in to your account and start the adventure
-                        </span>
+                        <h1 class="flex justify-center title flex align-center text-primary text-boldest">
+                            Sign in to worklist
+                        </h1>
                         <br/>
                         <br/>
-                        <Input data_type="field" name="email" type="email" label="Email" label_class="light" hasLabel onChange={handleChange}/>
+                        <Input data_type="field" name="email" type="email" label="Email" label_class="dark" hasLabel onChange={handleChange}/>
                         <br/>
-                        <Input data_type="field" name="password" type="password" label="Password" label_class="light" hasLabel onChange={handleChange}/>
+                        <Input data_type="field" name="password" type="password" label="Password" label_class="dark" hasLabel onChange={handleChange}/>
                         <br/>
                         <Button onClick={onSignIn} label="Login" type="primary"/>
                     </div>

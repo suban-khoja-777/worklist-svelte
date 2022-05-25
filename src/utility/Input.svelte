@@ -38,7 +38,9 @@
 <style>
 
     input{
-        padding: 0.5em;
+        padding: 0.825rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 0.625rem;
         outline: none;
         border : none;
     }
@@ -46,7 +48,8 @@
     label {
         margin-bottom: 0.25rem;
         color: #d0d2d6;
-        font-size: .857rem;
+        font-size: 1.075rem;
+        font-weight: 600;
     }
 
     .width-half{
@@ -58,7 +61,7 @@
     }
 
     label.dark{
-        color: var(--text-primary-color);
+        color: #181C32;
     }
     
     label.light{
@@ -68,19 +71,23 @@
     input[type="text"]{
         border: none;
         outline: none;
-        color: var(--text-secondary-color);
+        color : #5E6278;
     }
 
     input[type="date"] , input[type="time"]{
         border: none;
         outline: none;
         flex-shrink: 0.75;
-        color: var(--text-secondary-color);
+        color : #5E6278;
+    }
+
+    /* ::-webkit-calendar-picker-indicator {
+        filter: invert(1);
     }
 
     ::-webkit-calendar-picker-indicator {
-        filter: invert(1);
-    }
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24"><path fill="#009EF7" d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>');
+    } */
 
     select{
         border: none;
@@ -92,37 +99,37 @@
     }
 
     input[data-type="field"][type="text"]{
-        border: 1px solid var(--border-primary-color);
-        background-color: var(--secondary-color);
-        color : var(--text-tertiary-color);
+        border: 1px solid #F5F8FA;
+        background-color: #F5F8FA;
+        color : #5E6278;
         border-radius: .357rem;
     }
 
     input[data-type="field"][type="email"]{
-        border: 1px solid var(--border-primary-color);
-        background-color: var(--secondary-color);
-        color : var(--text-tertiary-color);
+        border: 1px solid #F5F8FA;
+        background-color:#F5F8FA;
+        color : #5E6278;
         border-radius: .357rem;
     }
 
     input[data-type="field"][type="password"]{
-        border: 1px solid var(--border-primary-color);
-        background-color: var(--secondary-color);
-        color : var(--text-tertiary-color);
+        border: 1px solid #F5F8FA;
+        background-color: #F5F8FA;
+        color : #5E6278;
         border-radius: .357rem;
     }
 
     input[data-type="field"][type="date"] , input[data-type="field"][type="time"]{
-        border: 1px solid var(--border-primary-color);
-        background-color: var(--secondary-color);
-        color : var(--text-tertiary-color);
+        border: 1px solid #F5F8FA;
+        background-color: #F5F8FA;
+        color : #5E6278;
         border-radius: .357rem;
     }
 
     textarea[data-type="field"]{
-        border: 1px solid var(--border-primary-color);
-        background-color: var(--secondary-color);
-        color : var(--text-tertiary-color);
+        border: 1px solid #F5F8FA;
+        background-color: #F5F8FA;
+        color : #5E6278;
         border-radius: .357rem;
     }
 

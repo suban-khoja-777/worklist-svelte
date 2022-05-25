@@ -66,7 +66,7 @@ const ENTRY_COLUMN = [
         field_type : "select"
     },
     {
-        label : "Payment",
+        label : "Payment Status",
         key : "payment_status",
         show_in_list : true,
         show_in_detail : true,

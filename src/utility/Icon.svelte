@@ -17,7 +17,7 @@
     }
 
     .primary{
-        background-color: var(--btn-primary-color);
+        background-color: #009ef7;
     }
 
     .danger{

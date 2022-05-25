@@ -42,10 +42,10 @@
         
         <div class="task-header flex align-center justify-space-between">
             <div class="flex align-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="25px" height="25px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                <!-- <svg xmlns="http://www.w3.org/2000/svg" width="25px" height="25px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                     <polyline points="13 2 13 9 20 9"></polyline>
-                </svg>
+                </svg> -->
                 <span class="task-title"> Time Entries </span>
             </div>
             <div class="flex align-center">
@@ -84,7 +84,7 @@
 <style>
 
     .detail-container{
-        margin-left: calc(20vw + 5.25rem);
+        margin-left: calc(15vw + 5.25rem);
         height: 100vh;
         width: calc(100vw - (20vw + 5.25rem));
         padding: 1rem;
@@ -92,30 +92,28 @@
 
     .list-header{
         padding: 0.5rem 0;
-        box-shadow: 0 4px 24px 0 rgb(34 41 47 / 10%);
     }
 
     .task-header{
         border-bottom: 1px solid var(--border-tertiary-color);
-        margin-bottom: 4px;
-        padding: 8px 0;
+        padding: 8px;
+        background-color: #22232B;
+        color : white;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
     }
 
     .list_name{
-        font-size: 2rem;
-        color: white;
+        font-size: 1.5rem;
+        color: #181c32;
+        font-weight: 600;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
     .task-title{
-        font-size: 1.5rem;
-        color: var(--primary-color);
-    }
-
-    .list-status{
-       height: 40px;
-       padding: 0.25rem 1.25rem;
+        font-size: 1.25rem;
+        color: white;
     }
 
     .columns{
@@ -127,22 +125,7 @@
     .column{
         padding: 0.5rem;
         width: 95%;
-    }
-
-    .task_name{
-        width: 55%;
-    }
-
-    .task_start_date,.task_end_date{
-        width: 15%;
-    }
-
-    .task_status,.aggregator-container{
-        width: 15%;
-    }
-
-    .aggregator-container{
-        height: 40px;
+        color: #b5b5c3;
     }
 
     .column:first-of-type{
@@ -153,51 +136,25 @@
         border-right: 0;
     }
 
-    .action-container{
-        width: 10%;
-    }
-
     .task-container{
         width: 100%;
-    }
-    
-    .task-note{
-        width: 100%;
-    }
-
-    .list-start-date{
-        margin-right: 5px;
-    }
-
-    .list-end-date{
-        margin-left: 5px;
-    }
-
-    .icon{
-        color: var(--primary-color);
-        font-weight: 400;
-    }
-
-    .task-header .icon{
-        margin-right : 5px;
+        background: white;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        box-shadow : 0px 0px 20px 0px rgb(76 87 125 / 2%);
     }
 
     .alert{
-        background-color: rgba(115,103,240,.12);
+        background-color: #F1416C;
         border: none;
         padding: 0;
-        border-radius: 0.3rem;
-        color : var(--primary-color);;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        color : #181c32;
     }
 
     .alert-body{
         padding: .71rem 1rem;
-    }
-
-    .bullet{
-        width: .714rem;
-        height: .714rem;
-        border-radius: 50%;
     }
 
     .list-dates{

@@ -12,7 +12,7 @@
 	font-family : normal;
 	font-size: 16px;
 	
-	--bg-color : #171d31;
+	--bg-color : #f9fafb;
 
 	--primary-color : #7367f0;
 	--secondary-color : #283046;
@@ -22,7 +22,7 @@
 	--btn-primary-color : #7367f0;
 	--btn-secondary-color : #161d31;
 	--warning-color : #ff9f43;
-	--danger-color : #ea5455;
+	--danger-color : #ef305e;
 	--success-color : #28c76f;
 
 	--text-primary-color : #283046;
@@ -69,7 +69,7 @@ body {
 }
 
 .text-primary{
-	color : var(--primary-color);
+	color : #181C32 !important;
 }
 
 .text-white{
@@ -129,6 +129,10 @@ body {
 	text-align: center;
 }
 
+.text-large{
+	font-size: 1.75rem;
+}
+
 .justify-start{
 	justify-content: flex-start;
 }
@@ -173,6 +177,10 @@ body {
 	cursor: pointer;
 }
 
+.border-radius-5{
+	border-radius: 5px;
+}
+
 
 .option{
 	padding: 0.5rem;
@@ -192,18 +200,18 @@ body {
 /** Status Classes Start **/
 
 .Pending{
-	background-color: #ea545520;
-    color: #ea5455;
+	color: #fff !important;
+    background-color: #F1416C;
 }
 
 .Paid{
-	background-color: #28c76f20;
-    color: #28c76f;
+	color: #fff !important;
+    background-color: #50CD89;
 }
 
 .duration{
-	background-color: #7367f020;
-	color: #7367f0;
+	color: #fff !important;
+    background-color: #FFC700;
 }
 
 /** Status Classes End **/

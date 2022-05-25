@@ -44,8 +44,11 @@
     }
 
     const processSelectClientEvent = (client) => {
-        selected_client = client
+        selected_client = client;
+        console.log('selected_client ',selected_client);
         work_entries = store.filter(entry => entry.client[0]._id === client._id);
+        
+        console.log('work_entries ',work_entries);
     }
 
     const saveNewClient = () => {
@@ -107,20 +110,6 @@
         POPUP.NEW_ENTRY = true;
     }
     
-    const processEditEntryPopup = (entry_id) => {
-        for(let i=0;i<work_entries.length;i++){
-            if(work_entries[i]._id === entry_id){
-                selected_entry = JSON.parse(JSON.stringify(work_entries[i]));
-                backup_selected_entry = JSON.parse(JSON.stringify(work_entries[i]));
-            }
-        }
-        component_fields = {
-            component_name : true,
-            component_date : true,
-            component_version : true
-        }
-        POPUP.EDIT_COMPONENT = true;
-    }
 
     const processUpdateEntryStatus = (entry) => {
         fireEvent(EVENTS.SHOW_SPINNER,{});
@@ -131,8 +120,12 @@
                     work_entries[i].payment_status = entry.payment_status;
                 }
             }
+            for(let i=0;i<store.length;i++){
+                if(store[i]._id === entry._id){
+                    store[i].payment_status = entry.payment_status;
+                }
+            }
             work_entries = work_entries;
-            store = work_entries;
             store = store;
             fireEvent(EVENTS.HIDE_SPINNER,{});
             fireEvent(EVENTS.CLOSE_POPUP,'NEW_ENTRY');
@@ -167,13 +160,22 @@
         .then(res => {
             work_entries.push({
                 _id:res._id,
-                client : new_entry.client,
+                client : res.client,
                 start_date : new_entry.start_date,
                 start_time : new_entry.start_time,
                 payment_status : new_entry.payment_status,
                 duration : new_entry.duration,
             });
-            
+
+            store.push({
+                _id:res._id,
+                client : res.client,
+                start_date : new_entry.start_date,
+                start_time : new_entry.start_time,
+                payment_status : new_entry.payment_status,
+                duration : new_entry.duration,
+            });
+
             new_entry = {
                 client : "",
                 start_date : "",
@@ -183,7 +185,6 @@
             };
 
             work_entries = work_entries;
-            store = work_entries;
             store = store;
             fireEvent(EVENTS.HIDE_SPINNER,{});
             fireEvent(EVENTS.CLOSE_POPUP,'NEW_ENTRY');
@@ -205,8 +206,13 @@
                     break;
                 }
             }
+            for(let i=0;i<store.length;i++){
+                if(store[i]._id === entry_id){
+                    store.splice(i,1);
+                    break;
+                }
+            }
             work_entries = work_entries;
-            store = work_entries;
             store = store;
             fireEvent(EVENTS.HIDE_SPINNER,{});
         })
@@ -237,7 +243,6 @@
         registerListener(EVENTS.DELETE_CLIENT,processDeleteClient);
 
         registerListener(EVENTS.OPEN_NEW_ENTRY_POPUP,processOpenEntryPopup);
-        registerListener(EVENTS.OPEN_EDIT_ENTRY_POPUP,processEditEntryPopup);
         registerListener(EVENTS.UPDATE_ENTRY_STATUS,processUpdateEntryStatus);
         registerListener(EVENTS.DELETE_ENTRY,processDeleteEntry);
 
@@ -266,7 +271,6 @@
         unregisterListener(EVENTS.OPEN_NEW_CLIENT_POPUP,processOpenNewClientPopup);
         unregisterListener(EVENTS.DELETE_CLIENT,processDeleteClient);
         unregisterListener(EVENTS.OPEN_NEW_ENTRY_POPUP,processOpenEntryPopup);
-        unregisterListener(EVENTS.OPEN_EDIT_ENTRY_POPUP,processEditEntryPopup);
         unregisterListener(EVENTS.UPDATE_ENTRY_STATUS,processUpdateEntryStatus);
         unregisterListener(EVENTS.DELETE_ENTRY,processDeleteEntry);
 
@@ -286,7 +290,7 @@
         <div class="flex flex-column justify-center">
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input label_class={client_fields.name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.name ? '' : 'has-error'}" value={new_client.Name} onChange={handleNewClientChange} data_field="Name" Required/>
+                    <Input label_class="dark {client_fields.name ? '' : 'has-error'}" data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.name ? '' : 'has-error'}" value={new_client.Name} onChange={handleNewClientChange} data_field="Name" Required/>
                 </div>
             </div>
         </div>
@@ -299,55 +303,22 @@
         <div class="flex flex-column justify-center">
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input label_class={entry_fields.start_date ? '' : 'has-error'} data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {entry_fields.start_date ? '' : 'has-error'}" value={new_entry.start_date} onChange={handleNewEntryChange} data_field="start_date" Required/>
+                    <Input label_class="dark {entry_fields.start_date ? '' : 'has-error'}" data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {entry_fields.start_date ? '' : 'has-error'}" value={new_entry.start_date} onChange={handleNewEntryChange} data_field="start_date" Required/>
                 </div>
                 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Payment Status" hasLabel width_class="width-full" type="select" classes="bg-transparent {getEntryPaymentStatusClass(new_entry.payment_status)}" value={new_entry.payment_status} onChange={handleNewEntryChange} data_field="payment_status" options={PAYMENT_STATUS} Required/>
+                    <Input label_class="dark" data_type="field" label="Payment Status" hasLabel width_class="width-full" type="select" classes="bg-transparent {getEntryPaymentStatusClass(new_entry.payment_status)}" value={new_entry.payment_status} onChange={handleNewEntryChange} data_field="payment_status" options={PAYMENT_STATUS} Required/>
                 </div>
             </div>
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input label_class={entry_fields.start_time ? '' : 'has-error'} data_type="field" label="Start Time" hasLabel width_class="width-full" type="time" classes="bg-transparent {entry_fields.start_time ? '' : 'has-error'}" value={new_entry.start_time} onChange={handleNewEntryChange} data_field="start_time" Required/>
+                    <Input label_class="dark {entry_fields.start_time ? '' : 'has-error'}" data_type="field" label="Start Time" hasLabel width_class="width-full" type="time" classes="bg-transparent {entry_fields.start_time ? '' : 'has-error'}" value={new_entry.start_time} onChange={handleNewEntryChange} data_field="start_time" Required/>
                 </div>
 
                 <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Duration" hasLabel width_class="width-full" type="select" classes="bg-transparent" value={new_entry.duration} onChange={handleNewEntryChange} data_field="duration" options={ENTRY_DURATIONS} Required />
+                    <Input label_class="dark" data_type="field" label="Duration" hasLabel width_class="width-full" type="select" classes="bg-transparent" value={new_entry.duration} onChange={handleNewEntryChange} data_field="duration" options={ENTRY_DURATIONS} Required />
                 </div>
             </div>
-        </div>
-    </Popup>
-{/if}
-
-{#if POPUP.EDIT_COMPONENT}
-    <Popup header="Edit Component" _popup_name="EDIT_COMPONENT" OnSave={updateComponent}>
-        <div class="flex flex-column justify-center">
-
-            <div class="flex form-row">
-                <div class="flex flex-column form-column grow">
-                    <Input label_class={component_fields.component_name ? '' : 'has-error'} data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {component_fields.component_name ? '' : 'has-error'}" value={selected_component.component_name} onChange={handleExistingComponentChange} data_field="component_name" Required/>
-                </div>
-                <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Type" hasLabel width_class="width-full" type="select" classes="bg-transparent {getEntryPaymentStatusClass(selected_component.component_type)}" value={selected_component.component_type} onChange={handleExistingComponentChange} data_field="component_type" options={COMPONENT_TYPE_LIST} Required/>
-                </div>
-                
-            </div>
-            <div class="flex form-row">
-
-                <div class="flex flex-column form-column grow">
-                    <Input label_class={component_fields.component_date ? '' : 'has-error'} data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {component_fields.component_date ? '' : 'has-error'}" value={selected_component.component_date} onChange={handleExistingComponentChange} data_field="component_date" Required/>
-                </div>
-                <div class="flex flex-column form-column grow">
-                    <Input label_class={component_fields.component_version ? '' : 'has-error'} data_type="field" label="Version" hasLabel width_class="width-full" type="text" classes="bg-transparent {component_fields.component_version ? '' : 'has-error'}" value={selected_component.component_version} onChange={handleExistingComponentChange} data_field="component_version" Required={selected_component.component_type === "Omniscript" || selected_component.component_type === "Integration Procedure" || selected_component.component_type === "Flow"}/>
-                </div>
-                
-            </div>
-            <div class="flex form-row">
-                <div class="flex flex-column form-column grow">
-                    <Input data_type="field" label="Parent Component (if any)" hasLabel width_class="width-full" type="text" classes="bg-transparent" value={selected_component.component_parent_name} onChange={handleExistingComponentChange} data_field="component_parent_name" />
-                </div>
-            </div>
-            
         </div>
     </Popup>
 {/if}

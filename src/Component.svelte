@@ -68,8 +68,8 @@
     <span class="column flex grow justify-center border-box text-bold pointer entry_column  justify-center align-center">
         <Input label="Version" width_class="width-full" type="text" classes="bg-transparent text-center" value={entry.duration} data_field="duration" readOnly/>
     </span>
-    <span class="column flex grow justify-center border-box text-bold pointer entry_column justify-center align-stretch">
-        <Input label="Type" width_class="width-full" type="select" classes="bg-transparent text-center {getEntryPaymentStatusClass(entry.payment_status)}" value={entry.payment_status} data_field="payment_status" options={PAYMENT_STATUS} onChange={sendChangeStatusEvent}/>
+    <span class="column column-select flex grow justify-center border-box text-bold pointer entry_column justify-center align-stretch">
+        <Input label="Type" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 {getEntryPaymentStatusClass(entry.payment_status)}" value={entry.payment_status} data_field="payment_status" options={PAYMENT_STATUS} onChange={sendChangeStatusEvent}/>
     </span>
          
 </li>
@@ -79,12 +79,14 @@
     .columns{
         width: 100%;
         list-style: none;
-        background-color: var(--secondary-color);
+        background-color: transparent;
         margin-bottom: 4px;
-        color: var(--text-secondary-color);
-        padding-left: 1rem;
-        box-shadow: 0 4px 24px 0 rgb(34 41 47 / 24%);
-        border-radius: 4px;
+        color: #3F4254;
+        border-bottom: 1px solid #EFF2F5;
+    }
+
+    .column-select{
+        padding: 5px 25px;
     }
 
     .column{
@@ -98,6 +100,10 @@
 
     li.columns:hover .row-actions{
         display: inherit;
+    }
+
+    .columns:last-of-type{
+        border-bottom: 0;
     }
 
 

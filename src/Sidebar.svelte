@@ -7,8 +7,14 @@
     let selected_client_id;
 
     const sendSelectClientEvent = (evt) => {
-        fireEvent(EVENTS.SELECT_CLIENT,clients.filter(client => client._id == evt.currentTarget.dataset.id)[0]);
-        selected_client_id = evt.currentTarget.dataset.id;
+        try{
+            selected_client_id = evt.currentTarget.dataset.id;
+            fireEvent(EVENTS.SELECT_CLIENT,clients.filter(client => client._id == selected_client_id)[0]);
+        
+        }catch(exp){
+            console.log(exp);
+        }
+        
     } 
 
     const sendNewClientEvent = (evt) => {
@@ -105,7 +111,7 @@
 
     .sidebar{
         width: 17vw;
-        background-color: var(--secondary-color);
+        background-color: #EFE9E1;
         height: 100%;
         z-index: 1;
         left: 0;
@@ -124,7 +130,7 @@
 
     .list-item{
         white-space : nowrap;
-        color: var(--text-secondary-color);
+        color: #181C32;
         line-height: 1.45;
         padding: 0.25rem 0;
     }
@@ -136,6 +142,7 @@
         /* border-radius: 5px; */
         overflow: hidden;
         border: 1px solid transparent;
+        font-weight: 300;
     }
 
     .item-name{
@@ -149,14 +156,11 @@
     }
 
     .item-content:hover{
-        background-color: #7367f020;
-	    border: 1px solid var(--primary-color);
+        text-decoration: underline;
     }
 
     .item-content.active{       
-        background-color: #7367f020;
-        color: #7367f0;
-	    border: 1px solid #7367f0;
+        color: #28c76f;
     }
 
     ul{
