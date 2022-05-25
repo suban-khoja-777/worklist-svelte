@@ -1,7 +1,7 @@
 <script>
 
     import { fireEvent, EVENTS } from "./EventManager";
-    import { PAYMENT_STATUS ,getEntryPaymentStatusClass , formatDateString , formatTimeString } from "./constants";
+    import { PAYMENT_STATUS ,getEntryPaymentStatusClass , formatDateString , formatTimeString, ENTRY_DURATIONS } from "./constants";
     import Input from "./utility/Input.svelte";
     import Icon from "./utility/Icon.svelte";
     export let entry;
@@ -16,6 +16,14 @@
         fireEvent(EVENTS.UPDATE_ENTRY_STATUS,{
             _id : entry._id,
             payment_status : entry.payment_status
+        });
+    }
+
+    const sendChangeDurationEvent = (evt) => {
+        entry.duration =  evt.target.value;
+        fireEvent(EVENTS.UPDATE_ENTRY_DURATION,{
+            _id : entry._id,
+            duration : Number(entry.duration)
         });
     }
 
@@ -63,13 +71,13 @@
 
     </span>
     <span class="column flex grow justify-center border-box text-bold pointer entry_column  justify-center align-center">
-        <Input label="Version" width_class="width-full" type="text" classes="bg-transparent text-center" value={formatTimeString(entry.start_time)} data_field="start_time" readOnly/>
+        <Input label="Start Time" width_class="width-full" type="text" classes="bg-transparent text-center" value={formatTimeString(entry.start_time)} data_field="start_time" readOnly/>
     </span>
-    <span class="column flex grow justify-center border-box text-bold pointer entry_column  justify-center align-center">
-        <Input label="Version" width_class="width-full" type="text" classes="bg-transparent text-center" value={entry.duration} data_field="duration" readOnly/>
+    <span class="column column-select flex grow justify-center border-box text-bold pointer entry_column  justify-center align-center">
+        <Input label="Duration" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 height-100" value={Number(entry.duration)} data_field="duration" options={ENTRY_DURATIONS} onChange={sendChangeDurationEvent}/>
     </span>
     <span class="column column-select flex grow justify-center border-box text-bold pointer entry_column justify-center align-stretch">
-        <Input label="Type" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 {getEntryPaymentStatusClass(entry.payment_status)}" value={entry.payment_status} data_field="payment_status" options={PAYMENT_STATUS} onChange={sendChangeStatusEvent}/>
+        <Input label="Payment Status" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 {getEntryPaymentStatusClass(entry.payment_status)}" value={entry.payment_status} data_field="payment_status" options={PAYMENT_STATUS} onChange={sendChangeStatusEvent}/>
     </span>
          
 </li>

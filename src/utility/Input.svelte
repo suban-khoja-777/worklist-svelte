@@ -60,6 +60,10 @@
         width: 100%;
     }
 
+    .height-100{
+        height: 100%;
+    }
+
     label.dark{
         color: #181C32;
     }

@@ -101,6 +101,23 @@ export const updateEntryStatus = (entry) => {
     });
 };
 
+export const updateEntryDuration = (entry) => {
+    return fetch(API.BASE_ENDPOINT+API.ENDPOINTS.work_entry+'/'+entry._id,{
+        method : 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-apikey': '6289328e4cca5010d1293f02',
+        },
+        body : JSON.stringify({
+            duration : entry.duration
+        })
+    })
+    .then(res => res.json())
+    .catch(err => {
+        console.error('getUserDataCallout : ',err);
+    });
+};
+
 
 
 

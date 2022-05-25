@@ -1,6 +1,6 @@
 <script>
     import { onMount , onDestroy} from "svelte";
-    import {getAllWorkEntry , createTimeEntry , deleteTimeEntry, updateEntryStatus ,createClient,deleteClient} from '../api';
+    import {getAllWorkEntry , createTimeEntry , deleteTimeEntry, updateEntryStatus,updateEntryDuration ,createClient,deleteClient} from '../api';
     import { AUTH } from "../firebase";
     import Input from "../utility/Input.svelte";
     import Popup from "../utility/Popup.svelte";
@@ -11,7 +11,7 @@
 
     let store = [];
     let work_entries = [];
-
+    let new_duration = DEFAULTS.DURATION;
     const POPUP = {
         NEW_CLIENT : false,
         NEW_ENTRY : false,
@@ -33,7 +33,10 @@
     }
 
     const handleNewClientChange = (e) => {
-        new_client[e.target.dataset.field] = e.target.value;
+        if(e.target.dataset.field === 'duration'){
+            new_client = e.target.value;
+        }else
+            new_client[e.target.dataset.field] = e.target.value;
     }
 
     const processOpenNewClientPopup = () => {
@@ -94,7 +97,11 @@
     }
 
     const handleNewEntryChange = (e) => {
-        new_entry[e.target.dataset.field] = e.target.value;
+        if(e.target.dataset.field == "duration"){
+            new_entry[e.target.dataset.field] = Number(e.target.value);
+        }else{
+            new_entry[e.target.dataset.field] = e.target.value;
+        }
     }
 
     const processOpenEntryPopup = () => {
@@ -123,6 +130,30 @@
             for(let i=0;i<store.length;i++){
                 if(store[i]._id === entry._id){
                     store[i].payment_status = entry.payment_status;
+                }
+            }
+            work_entries = work_entries;
+            store = store;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+            fireEvent(EVENTS.CLOSE_POPUP,'NEW_ENTRY');
+        })
+        .catch(err => {
+            fireEvent(EVENTS.HIDE_SPINNER,{});
+        });
+    }
+
+    const processUpdateEntryDuration = (entry) => {
+        fireEvent(EVENTS.SHOW_SPINNER,{});
+        updateEntryDuration(entry)
+        .then(res => {
+            for(let i=0;i<work_entries.length;i++){
+                if(work_entries[i]._id === entry._id){
+                    work_entries[i].duration = entry.duration;
+                }
+            }
+            for(let i=0;i<store.length;i++){
+                if(store[i]._id === entry._id){
+                    store[i].duration = entry.duration;
                 }
             }
             work_entries = work_entries;
@@ -244,6 +275,7 @@
 
         registerListener(EVENTS.OPEN_NEW_ENTRY_POPUP,processOpenEntryPopup);
         registerListener(EVENTS.UPDATE_ENTRY_STATUS,processUpdateEntryStatus);
+        registerListener(EVENTS.UPDATE_ENTRY_DURATION,processUpdateEntryDuration);
         registerListener(EVENTS.DELETE_ENTRY,processDeleteEntry);
 
         registerListener(EVENTS.CLOSE_POPUP,processClosePopup);
@@ -272,6 +304,7 @@
         unregisterListener(EVENTS.DELETE_CLIENT,processDeleteClient);
         unregisterListener(EVENTS.OPEN_NEW_ENTRY_POPUP,processOpenEntryPopup);
         unregisterListener(EVENTS.UPDATE_ENTRY_STATUS,processUpdateEntryStatus);
+        unregisterListener(EVENTS.UPDATE_ENTRY_STATUS,processUpdateEntryDuration);
         unregisterListener(EVENTS.DELETE_ENTRY,processDeleteEntry);
 
         unregisterListener(EVENTS.CLOSE_POPUP,processClosePopup);
@@ -316,7 +349,7 @@
                 </div>
 
                 <div class="flex flex-column form-column grow">
-                    <Input label_class="dark" data_type="field" label="Duration" hasLabel width_class="width-full" type="select" classes="bg-transparent" value={new_entry.duration} onChange={handleNewEntryChange} data_field="duration" options={ENTRY_DURATIONS} Required />
+                    <Input label_class="dark" data_type="field" label="Duration" hasLabel width_class="width-full" type="select" classes="bg-transparent" bind:value={new_entry.duration} onChange={handleNewEntryChange} data_field="duration" options={ENTRY_DURATIONS} Required />
                 </div>
             </div>
         </div>

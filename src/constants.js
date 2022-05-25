@@ -114,6 +114,7 @@ const formatTimeString = (_TimeString) =>{
     let _hour = Number(timeArr[0]);
     const isAMPM = _hour >= 12 ? 'PM' : 'AM';
     _hour = (_hour > 12) ? _hour - 12 : _hour;
+    _hour = (_hour == 0) ? 12 : _hour;
     _hour = (_hour < 10) ? '0' + _hour : _hour;
     return _hour + ':' + timeArr[1] + ':' + timeArr[2] + ' ' + isAMPM; 
 }
