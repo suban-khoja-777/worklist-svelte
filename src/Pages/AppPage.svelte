@@ -154,14 +154,17 @@
         fireEvent(EVENTS.SHOW_SPINNER,{});
         updateEntryDuration(entry)
         .then(res => {
+            console.log('@@@ RES ',res);
             for(let i=0;i<work_entries.length;i++){
                 if(work_entries[i]._id === entry._id){
                     work_entries[i].duration = entry.duration;
+                    work_entries[i].Amount = res.Amount;
                 }
             }
             for(let i=0;i<store.length;i++){
                 if(store[i]._id === entry._id){
                     store[i].duration = entry.duration;
+                    store[i].Amount = res.Amount;
                 }
             }
             work_entries = work_entries;
