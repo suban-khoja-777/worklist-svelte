@@ -1,7 +1,6 @@
 <script>
     import { onMount , onDestroy} from "svelte";
     import {getAllWorkEntry , createTimeEntry , deleteTimeEntry, updateEntryStatus,updateEntryDuration ,createClient,deleteClient} from '../api';
-    import { AUTH } from "../firebase";
     import Input from "../utility/Input.svelte";
     import Popup from "../utility/Popup.svelte";
     import {registerListener , unregisterListener, EVENTS, fireEvent} from '../EventManager';
@@ -11,7 +10,6 @@
 
     let store = [];
     let work_entries = [];
-    let new_duration = DEFAULTS.DURATION;
     const POPUP = {
         NEW_CLIENT : false,
         NEW_ENTRY : false,
@@ -30,8 +28,8 @@
     };
 
     let client_fields = {
-        name : true,
-        rate : true
+        Name : true,
+        Rate : true
     }
 
     const handleNewClientChange = (e) => {
@@ -43,29 +41,29 @@
 
     const processOpenNewClientPopup = () => {
         client_fields = {
-            name : true,
-            rate : true
+            Name : true,
+            Rate : true
         }
         POPUP.NEW_CLIENT = true;
     }
 
     const processSelectClientEvent = (client) => {
         selected_client = client;
-        work_entries = store.filter(entry => entry.client[0]._id === client._id);
+        work_entries = store.filter(entry => entry.Client[0]._id === client._id);
     }
 
     const saveNewClient = () => {
         if(!new_client.Name){
-            client_fields.name = false;
+            client_fields.Name = false;
             return;
         }else{
-            client_fields.name = true;
+            client_fields.Name = true;
         }
         if(!new_client.Rate){
-            client_fields.rate = false;
+            client_fields.Rate = false;
             return;
         }else{
-            client_fields.rate = true;
+            client_fields.Rate = true;
         }
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createClient(new_client)
@@ -88,24 +86,21 @@
         fireEvent(EVENTS.CLOSE_POPUP,'NEW_CLIENT');
     }
 
-    let selected_entry;
-    let backup_selected_entry;
-
     let new_entry = {
-        client : "",
-        start_date : "",
-        start_time : "",
-        payment_status : DEFAULTS.PAYMENT_STATUS,
-        duration : DEFAULTS.DURATION
+        Client : "",
+        Start_Date : "",
+        Start_Time : "",
+        Payment_Status : DEFAULTS.PAYMENT_STATUS,
+        Duration : DEFAULTS.DURATION
     };
 
     let entry_fields = {
-        start_date : true,
-        start_time : true
+        Start_Date : true,
+        Start_Time : true
     }
 
     const handleNewEntryChange = (e) => {
-        if(e.target.dataset.field == "duration"){
+        if(e.target.dataset.field == "Dration"){
             new_entry[e.target.dataset.field] = Number(e.target.value);
         }else{
             new_entry[e.target.dataset.field] = e.target.value;
@@ -113,15 +108,13 @@
     }
 
     const processOpenEntryPopup = () => {
-        
-        console.log('processOpenEntryPopup Recieved');
         entry_fields = {
-            start_date : true,
-            start_time : true
+            Start_Date : true,
+            Start_Time : true
         };
-        new_entry.client = selected_client;
-        new_entry.start_date = convertDateToString(new Date());
-        new_entry.start_time = convertDateToTimeString(new Date());
+        new_entry.Client = selected_client;
+        new_entry.Start_Date = convertDateToString(new Date());
+        new_entry.Start_Time = convertDateToTimeString(new Date());
         POPUP.NEW_ENTRY = true;
     }
     
@@ -132,12 +125,12 @@
         .then(res => {
             for(let i=0;i<work_entries.length;i++){
                 if(work_entries[i]._id === entry._id){
-                    work_entries[i].payment_status = entry.payment_status;
+                    work_entries[i].Payment_Status = entry.Payment_Status;
                 }
             }
             for(let i=0;i<store.length;i++){
                 if(store[i]._id === entry._id){
-                    store[i].payment_status = entry.payment_status;
+                    store[i].Payment_Status = entry.Payment_Status;
                 }
             }
             work_entries = work_entries;
@@ -154,16 +147,15 @@
         fireEvent(EVENTS.SHOW_SPINNER,{});
         updateEntryDuration(entry)
         .then(res => {
-            console.log('@@@ RES ',res);
             for(let i=0;i<work_entries.length;i++){
                 if(work_entries[i]._id === entry._id){
-                    work_entries[i].duration = entry.duration;
+                    work_entries[i].Duration = entry.Duration;
                     work_entries[i].Amount = res.Amount;
                 }
             }
             for(let i=0;i<store.length;i++){
                 if(store[i]._id === entry._id){
-                    store[i].duration = entry.duration;
+                    store[i].Duration = entry.Duration;
                     store[i].Amount = res.Amount;
                 }
             }
@@ -179,53 +171,49 @@
 
     const saveNewEntry = () => {
         
-        if(!new_entry.start_date){
-            entry_fields.start_date = false;
+        if(!new_entry.Start_Date){
+            entry_fields.Start_Date = false;
             return;
         }else{
-            entry_fields.start_date = true;
+            entry_fields.Start_Date = true;
         }
 
-
-        if(!new_entry.start_time){
-            entry_fields.start_time = false;
+        if(!new_entry.Start_Time){
+            entry_fields.Start_Time = false;
             return;
         }else{
-            entry_fields.start_time = true;
+            entry_fields.Start_Time = true;
         }
-
-        console.log('new entry',new_entry);
-        
 
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createTimeEntry(new_entry)
         .then(res => {
             work_entries.push({
                 _id:res._id,
-                client : res.client,
-                start_date : new_entry.start_date,
-                start_time : new_entry.start_time,
-                payment_status : new_entry.payment_status,
-                duration : new_entry.duration,
+                Client : res.Client,
+                Start_Date : new_entry.Start_Date,
+                Start_Time : new_entry.Start_Time,
+                Payment_Status : new_entry.Payment_Status,
+                Duration : new_entry.Duration,
                 Amount : res.Amount
             });
 
             store.push({
                 _id:res._id,
-                client : res.client,
-                start_date : new_entry.start_date,
-                start_time : new_entry.start_time,
-                payment_status : new_entry.payment_status,
-                duration : new_entry.duration,
+                Client : res.Client,
+                Start_Date : new_entry.Start_Date,
+                Start_Time : new_entry.Start_Time,
+                Payment_Status : new_entry.Payment_Status,
+                Duration : new_entry.Duration,
                 Amount : res.Amount
             });
 
             new_entry = {
-                client : "",
-                start_date : "",
-                start_time : "",
-                payment_status : DEFAULTS.PAYMENT_STATUS,
-                duration : DEFAULTS.DURATION
+                Client : "",
+                Start_Date : "",
+                Start_Time : "",
+                Payment_Status : DEFAULTS.PAYMENT_STATUS,
+                Duration : DEFAULTS.DURATION
             };
 
             work_entries = work_entries;
@@ -298,8 +286,8 @@
         getAllWorkEntry()
         .then(res => {
             if(res && res && res.length){
+                console.log('Store ',res);
                 store = res;
-                console.log(store);
                 store = store;
                 fireEvent(EVENTS.HIDE_SPINNER,{});
             }else{
@@ -336,10 +324,10 @@
         <div class="flex flex-column justify-center">
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input label_class="dark {client_fields.name ? '' : 'has-error'}" data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.name ? '' : 'has-error'}" value={new_client.Name} onChange={handleNewClientChange} data_field="Name" Required/>
+                    <Input label_class="dark {client_fields.Name ? '' : 'has-error'}" data_type="field" label="Name" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.Name ? '' : 'has-error'}" value={new_client.Name} onChange={handleNewClientChange} data_field="Name" Required/>
                 </div>
                 <div class="flex flex-column form-column grow">
-                    <Input label_class="dark {client_fields.rate ? '' : 'has-error'}" data_type="field" label="Rate (Per Hour)" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.rate ? '' : 'has-error'}" value={new_client.Rate} onChange={handleNewClientChange} data_field="Rate" Required/>
+                    <Input label_class="dark {client_fields.Rate ? '' : 'has-error'}" data_type="field" label="Rate (Per Hour)" hasLabel width_class="width-full" type="text" classes="bg-transparent {client_fields.Rate ? '' : 'has-error'}" value={new_client.Rate} onChange={handleNewClientChange} data_field="Rate" Required/>
                 </div>
             </div>
         </div>
@@ -352,20 +340,20 @@
         <div class="flex flex-column justify-center">
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input label_class="dark {entry_fields.start_date ? '' : 'has-error'}" data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {entry_fields.start_date ? '' : 'has-error'}" value={new_entry.start_date} onChange={handleNewEntryChange} data_field="start_date" Required/>
+                    <Input label_class="dark {entry_fields.Start_Date ? '' : 'has-error'}" data_type="field" label="Date" hasLabel width_class="width-full" type="date" classes="bg-transparent {entry_fields.Start_Date ? '' : 'has-error'}" value={new_entry.Start_Date} onChange={handleNewEntryChange} data_field="Start_Date" Required/>
                 </div>
                 
                 <div class="flex flex-column form-column grow">
-                    <Input label_class="dark" data_type="field" label="Payment Status" hasLabel width_class="width-full" type="select" classes="bg-transparent {getEntryPaymentStatusClass(new_entry.payment_status)}" value={new_entry.payment_status} onChange={handleNewEntryChange} data_field="payment_status" options={PAYMENT_STATUS} Required/>
+                    <Input label_class="dark" data_type="field" label="Payment Status" hasLabel width_class="width-full" type="select" classes="bg-transparent {getEntryPaymentStatusClass(new_entry.Payment_Status)}" value={new_entry.Payment_Status} onChange={handleNewEntryChange} data_field="Payment_Status" options={PAYMENT_STATUS} Required/>
                 </div>
             </div>
             <div class="flex form-row">
                 <div class="flex flex-column form-column grow">
-                    <Input label_class="dark {entry_fields.start_time ? '' : 'has-error'}" data_type="field" label="Start Time" hasLabel width_class="width-full" type="time" classes="bg-transparent {entry_fields.start_time ? '' : 'has-error'}" value={new_entry.start_time} onChange={handleNewEntryChange} data_field="start_time" Required/>
+                    <Input label_class="dark {entry_fields.Start_Time ? '' : 'has-error'}" data_type="field" label="Start Time" hasLabel width_class="width-full" type="time" classes="bg-transparent {entry_fields.Start_Time ? '' : 'has-error'}" value={new_entry.Start_Time} onChange={handleNewEntryChange} data_field="Start_Time" Required/>
                 </div>
 
                 <div class="flex flex-column form-column grow">
-                    <Input label_class="dark" data_type="field" label="Duration" hasLabel width_class="width-full" type="select" classes="bg-transparent" bind:value={new_entry.duration} onChange={handleNewEntryChange} data_field="duration" options={ENTRY_DURATIONS} Required />
+                    <Input label_class="dark" data_type="field" label="Duration" hasLabel width_class="width-full" type="select" classes="bg-transparent" bind:value={new_entry.Duration} onChange={handleNewEntryChange} data_field="Duration" options={ENTRY_DURATIONS} Required />
                 </div>
             </div>
         </div>

@@ -92,7 +92,7 @@ export const updateEntryStatus = (entry) => {
             'x-apikey': '6289328e4cca5010d1293f02',
         },
         body : JSON.stringify({
-            payment_status : entry.payment_status
+            Payment_Status : entry.Payment_Status
         })
     })
     .then(res => res.json())
@@ -109,7 +109,7 @@ export const updateEntryDuration = (entry) => {
             'x-apikey': '6289328e4cca5010d1293f02',
         },
         body : JSON.stringify({
-            duration : entry.duration
+            Duration : entry.Duration
         })
     })
     .then(res => res.json())

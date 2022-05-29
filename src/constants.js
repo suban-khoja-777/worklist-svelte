@@ -1,5 +1,5 @@
 
-export const APP_NAME = 'onelist';
+export const APP_NAME = 'worklist tracker';
 
 const API = {
     BASE_ENDPOINT : 'https://worklist1-935b.restdb.io/rest/',
@@ -40,7 +40,7 @@ const ENTRY_DURATIONS = [30,60,90,120,150];
 const ENTRY_COLUMN = [
     {
         label : "Date",
-        key : "start_date",
+        key : "Start_Date",
         show_in_list : true,
         show_in_detail : true,
         show_header : true,
@@ -49,7 +49,7 @@ const ENTRY_COLUMN = [
     },
     {
         label : "Start Time",
-        key : "start_time",
+        key : "Start_Time",
         show_in_list : true,
         show_in_detail : false,
         show_header : true,
@@ -58,7 +58,7 @@ const ENTRY_COLUMN = [
     },
     {
         label : "Duration",
-        key : "duration",
+        key : "Duration",
         show_in_list : true,
         show_in_detail : false,
         show_header : true,
@@ -67,7 +67,7 @@ const ENTRY_COLUMN = [
     },
     {
         label : "Payment Status",
-        key : "payment_status",
+        key : "Payment_Status",
         show_in_list : true,
         show_in_detail : true,
         show_header : true,

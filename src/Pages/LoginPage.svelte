@@ -56,11 +56,6 @@
         color: var(--primary-color);
     }
 
-    .sub-title{
-        font-size: 1rem;
-        color: white;
-    }
-
     .form-container{
         height: 100vh;
     }
@@ -91,8 +86,15 @@
     h1{
         margin: 0;
     }
-    
 
+    .app-highlight{
+        font-weight: 900;
+        background-color: #F1416C;
+        color: white;
+        padding: .25rem;
+        border-radius: 5px;
+    }
+    
 </style>
 
 <div class="flex flex-row container">
@@ -101,9 +103,12 @@
             <div class="form-container flex justify-center flex-column login-form">
                 <div class="sub-container grow flex justify-center align-center flex-row">
                     <div class="form form-right flex justify-center flex-column">
-                        <h1 class="flex justify-center title flex align-center text-primary text-boldest">
-                            Sign in to worklist
-                        </h1>
+                        <div class="flex flex-row justify-center align-cente">
+                            <h1 class="flex justify-center title flex align-center text-primary text-boldest">
+                                Sign in to worklist
+                            </h1>
+                            &nbsp;<span class="flex align-center justify-center app-highlight">tracker</span>
+                        </div>
                         <br/>
                         <br/>
                         <Input data_type="field" name="email" type="email" label="Email" label_class="dark" hasLabel onChange={handleChange}/>

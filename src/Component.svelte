@@ -12,18 +12,18 @@
     }
 
     const sendChangeStatusEvent = (evt) => {
-        entry.payment_status =  evt.target.value;
+        entry.Payment_Status =  evt.target.value;
         fireEvent(EVENTS.UPDATE_ENTRY_STATUS,{
             _id : entry._id,
-            payment_status : entry.payment_status
+            Payment_Status : entry.Payment_Status
         });
     }
 
     const sendChangeDurationEvent = (evt) => {
-        entry.duration =  evt.target.value;
+        entry.Duration =  evt.target.value;
         fireEvent(EVENTS.UPDATE_ENTRY_DURATION,{
             _id : entry._id,
-            duration : Number(entry.duration)
+            Duration : Number(entry.Duration)
         });
     }
 
@@ -40,7 +40,7 @@
 <li class="columns flex justify-space-between align-center border-box">
 
     <span class="column flex grow justify-center border-box text-bold pointer entry_column justify-center align-center">
-        <Input label="Name"  width_class="width-full" type="text" classes="bg-transparent" value={formatDateString(entry.start_date)} data_field="start_date" readOnly/>
+        <Input label="Name"  width_class="width-full" type="text" classes="bg-transparent" value={formatDateString(entry.Start_Date)} data_field="start_date" readOnly/>
         <span class="row-actions">
             {#if actions.includes('EDIT')}
                 <Icon type="warning" OnClick={sendOpenComponentDetailEvent}>
@@ -71,13 +71,13 @@
 
     </span>
     <span class="column flex grow justify-center border-box text-bold pointer entry_column  justify-center align-center">
-        <Input label="Start Time" width_class="width-full" type="text" classes="bg-transparent text-center" value={formatTimeString(entry.start_time)} data_field="start_time" readOnly/>
+        <Input label="Start Time" width_class="width-full" type="text" classes="bg-transparent text-center" value={formatTimeString(entry.Start_Time)} data_field="Start_Time" readOnly/>
     </span>
     <span class="column column-select flex grow justify-center border-box text-bold pointer entry_column  justify-center align-center">
-        <Input label="Duration" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 height-100" value={Number(entry.duration)} data_field="duration" options={ENTRY_DURATIONS} onChange={sendChangeDurationEvent}/>
+        <Input label="Duration" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 height-100" value={Number(entry.Duration)} data_field="Duration" options={ENTRY_DURATIONS} onChange={sendChangeDurationEvent}/>
     </span>
     <span class="column column-select flex grow justify-center border-box text-bold pointer entry_column justify-center align-stretch">
-        <Input label="Payment Status" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 {getEntryPaymentStatusClass(entry.payment_status)}" value={entry.payment_status} data_field="payment_status" options={PAYMENT_STATUS} onChange={sendChangeStatusEvent}/>
+        <Input label="Payment Status" width_class="width-full" type="select" classes="bg-transparent text-center border-radius-5 {getEntryPaymentStatusClass(entry.Payment_Status)}" value={entry.Payment_Status} data_field="Payment_Status" options={PAYMENT_STATUS} onChange={sendChangeStatusEvent}/>
     </span>
     <span class="column flex grow justify-center border-box text-bold pointer entry_column  justify-center align-center">
         <Input label="Amount" width_class="width-full" type="text" classes="bg-transparent text-center text-boldest" value="${entry.Amount}" data_field="Amount" readOnly/>
