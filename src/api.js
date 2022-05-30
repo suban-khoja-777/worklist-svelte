@@ -4,7 +4,7 @@ export const getAllWorkEntry = () => {
     return fetch(API.BASE_ENDPOINT+API.ENDPOINTS.work_entry,{
         headers: {
             'Content-Type': 'application/json',
-            'x-apikey': '6289328e4cca5010d1293f02',
+            'x-apikey': '6289328e4cca5010d1293f02'
           }
     })
     .then(res => res.json())
@@ -17,7 +17,7 @@ export const getClients = () => {
     return fetch(API.BASE_ENDPOINT+API.ENDPOINTS.client,{
         headers: {
             'Content-Type': 'application/json',
-            'x-apikey': '6289328e4cca5010d1293f02',
+            'x-apikey': '6289328e4cca5010d1293f02'
           }
     })
     .then(res => res.json())
@@ -31,7 +31,7 @@ export const createClient = (_client) => {
         method : 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-apikey': '6289328e4cca5010d1293f02',
+            'x-apikey': '6289328e4cca5010d1293f02'
         },
         body : JSON.stringify(_client)
     })
@@ -46,7 +46,7 @@ export const deleteClient = (client_id) => {
         method : 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-            'x-apikey': '6289328e4cca5010d1293f02',
+            'x-apikey': '6289328e4cca5010d1293f02'
         }
     })
     .then(res => res.json())
@@ -60,7 +60,7 @@ export const createTimeEntry = (_entry) => {
         method : 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-apikey': '6289328e4cca5010d1293f02',
+            'x-apikey': '6289328e4cca5010d1293f02'
         },
         body : JSON.stringify(_entry)
     })
@@ -75,7 +75,7 @@ export const deleteTimeEntry = (entry_id) => {
         method : 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-            'x-apikey': '6289328e4cca5010d1293f02',
+            'x-apikey': '6289328e4cca5010d1293f02'
         }
     })
     .then(res => res.json())
@@ -89,7 +89,7 @@ export const updateEntryStatus = (entry) => {
         method : 'PATCH',
         headers: {
             'Content-Type': 'application/json',
-            'x-apikey': '6289328e4cca5010d1293f02',
+            'x-apikey': '6289328e4cca5010d1293f02'
         },
         body : JSON.stringify({
             Payment_Status : entry.Payment_Status
@@ -106,7 +106,7 @@ export const updateEntryDuration = (entry) => {
         method : 'PATCH',
         headers: {
             'Content-Type': 'application/json',
-            'x-apikey': '6289328e4cca5010d1293f02',
+            'x-apikey': '6289328e4cca5010d1293f02'
         },
         body : JSON.stringify({
             Duration : entry.Duration
