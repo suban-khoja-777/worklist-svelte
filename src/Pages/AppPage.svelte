@@ -1,6 +1,6 @@
 <script>
     import { onMount , onDestroy} from "svelte";
-    import {getAllWorkEntry , createTimeEntry , deleteTimeEntry, updateEntryStatus,updateEntryDuration ,createClient,deleteClient} from '../api';
+    import {getWorkEntry , getClients ,createTimeEntry , deleteTimeEntry, updateEntryStatus,updateEntryDuration ,createClient,deleteClient} from '../api';
     import Input from "../utility/Input.svelte";
     import Popup from "../utility/Popup.svelte";
     import {registerListener , unregisterListener, EVENTS, fireEvent} from '../EventManager';
@@ -9,6 +9,7 @@
     import {getEntryPaymentStatusClass , DEFAULTS , PAYMENT_STATUS , ENTRY_DURATIONS , convertDateToString , convertDateToTimeString} from "../constants";
 
     let store = [];
+    let clients = [];
     let work_entries = [];
     const POPUP = {
         NEW_CLIENT : false,
@@ -68,11 +69,13 @@
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createClient(new_client)
         .then(res => {
-            fireEvent(EVENTS.SEND_NEW_CLIENT,{
+            clients.push({
                 _id : res._id,
                 Name : res.Name,
                 Rate : res.Rate
             });
+            clients = clients;
+            fireEvent(EVENTS.HIDE_SPINNER,{});
         })
         .catch(err => {
 
@@ -260,7 +263,7 @@
         deleteClient(client_id)
         .then(res => {
             selected_client = null;
-            fireEvent(EVENTS.SEND_REMOVE_CLIENT,client_id);
+            clients = clients.filter(client => client._id != client_id);
             fireEvent(EVENTS.HIDE_SPINNER,{});
         })
         .catch(err => {
@@ -283,12 +286,14 @@
         
         fireEvent(EVENTS.SHOW_SPINNER,{});
 
-        getAllWorkEntry()
+        Promise.all([getClients(),getWorkEntry()]) 
         .then(res => {
-            if(res && res && res.length){
-                console.log('Store ',res);
-                store = res;
+            if(res && res.length){
+                clients = res[0];
+                clients = clients;
+                store = res[1];
                 store = store;
+
                 fireEvent(EVENTS.HIDE_SPINNER,{});
             }else{
                 fireEvent(EVENTS.HIDE_SPINNER,{});
@@ -313,7 +318,7 @@
 </script>
 
 <div class="app-container flex align-center flex-column">
-    <Sidebar/>
+    <Sidebar {clients} selected_client_id ={selected_client?._id}/>
     {#if selected_client}
         <Container {selected_client} {work_entries}/>
     {/if}

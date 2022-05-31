@@ -2,7 +2,7 @@
 export const APP_NAME = 'worklist tracker';
 
 const API = {
-    BASE_ENDPOINT : 'https://worklist1-935b.restdb.io/rest/',
+    BASE_ENDPOINT : 'https://api.worklist-2022.site/tracker/',
     ENDPOINTS : {
         "work_entry" : 'work-entry',
         "client" : 'client'

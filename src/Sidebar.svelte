@@ -1,10 +1,8 @@
 <script>
-    import { onMount , onDestroy} from "svelte";
-    import { EVENTS , fireEvent,registerListener,unregisterListener } from "./EventManager";
-    import { getClients } from "./api";
+    import { EVENTS , fireEvent } from "./EventManager";
     import {signoutUser} from './firebase'
-    let clients = [];
-    let selected_client_id;
+    export let clients = [];
+    export let selected_client_id;
 
     const sendSelectClientEvent = (evt) => {
         try{
@@ -20,42 +18,6 @@
     const sendNewClientEvent = (evt) => {
         fireEvent(EVENTS.OPEN_NEW_CLIENT_POPUP,null);
     }
-
-    const processNewClientEvent = (_client) => {
-        clients.push(_client);
-        clients = clients;
-        fireEvent(EVENTS.HIDE_SPINNER,{});
-    }
-
-    const processRemoveClientEvent = (client_id) => {
-        clients = clients.filter(client => client._id != client_id);
-        selected_client_id = null;
-    }
-
-    onMount( () => {
-        
-        registerListener(EVENTS.SEND_NEW_CLIENT,processNewClientEvent);
-        registerListener(EVENTS.SEND_REMOVE_CLIENT,processRemoveClientEvent);
-        
-        getClients()
-        .then(res => {
-            if(res && res && res.length){
-                clients = res;
-                console.log(clients);
-                fireEvent(EVENTS.HIDE_SPINNER,{});
-            }else{
-                fireEvent(EVENTS.HIDE_SPINNER,{});
-            }
-        })
-        .catch(err => {
-            fireEvent(EVENTS.HIDE_SPINNER,{});
-        })
-    });
-
-    onDestroy(() => {
-        unregisterListener(EVENTS.SEND_NEW_CLIENT,processNewClientEvent);
-        unregisterListener(EVENTS.SEND_REMOVE_CLIENT,processRemoveClientEvent);
-    })
 
 </script>
 
