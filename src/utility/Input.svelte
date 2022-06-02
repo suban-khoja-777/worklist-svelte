@@ -124,6 +124,13 @@
         border-radius: .357rem;
     }
 
+    select.bg-grey{
+        border: 1px solid #F5F8FA;
+        background-color: #F5F8FA;
+        color: #5E6278;
+        border-radius: 0.357rem;
+    }
+
     input[data-type="field"][type="date"] , input[data-type="field"][type="time"]{
         border: 1px solid #F5F8FA;
         background-color: #F5F8FA;

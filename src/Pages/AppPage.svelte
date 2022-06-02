@@ -103,7 +103,7 @@
     }
 
     const handleNewEntryChange = (e) => {
-        if(e.target.dataset.field == "Dration"){
+        if(e.target.dataset.field == "Duration"){
             new_entry[e.target.dataset.field] = Number(e.target.value);
         }else{
             new_entry[e.target.dataset.field] = e.target.value;
@@ -358,7 +358,7 @@
                 </div>
 
                 <div class="flex flex-column form-column grow">
-                    <Input label_class="dark" data_type="field" label="Duration" hasLabel width_class="width-full" type="select" classes="bg-transparent" bind:value={new_entry.Duration} onChange={handleNewEntryChange} data_field="Duration" options={ENTRY_DURATIONS} Required />
+                    <Input label_class="dark" data_type="field" label="Duration" hasLabel width_class="width-full" type="select" classes="bg-grey" bind:value={new_entry.Duration} onChange={handleNewEntryChange} data_field="Duration" options={ENTRY_DURATIONS} Required />
                 </div>
             </div>
         </div>
