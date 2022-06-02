@@ -128,6 +128,20 @@ const formatTimeString = (_TimeString) =>{
     return _hour + ':' + timeArr[1] + ':' + timeArr[2] + ' ' + isAMPM; 
 }
 
+const sortWorkEntry = () => {
+    return function (a,b) {
+
+        if(a["Payment_Status"] == "Paid" && b["Payment_Status"] == "Pending"){
+            return -1;
+        }else if(a["Payment_Status"] == "Pending" && b["Payment_Status"] == "Paid"){
+            return 1;
+        }else{
+            return 0;
+        }
+
+    }
+}
+
 Object.freeze(API);
 Object.freeze(ENTRY_COLUMN);
 Object.freeze(DEFAULTS);
@@ -145,6 +159,7 @@ export {
     formatTimeString,
     convertDateToString,
     convertDateToTimeString,
+    sortWorkEntry,
     ENTRY_DURATIONS
 };
 

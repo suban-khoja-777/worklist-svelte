@@ -1,12 +1,12 @@
 <script>
     import { onMount , onDestroy} from "svelte";
-    import {getWorkEntry , getClients ,createTimeEntry , deleteTimeEntry, updateEntryStatus,updateEntryDuration ,createClient,deleteClient} from '../api';
+    import {getWorkEntry ,getClients ,createTimeEntry , deleteTimeEntry, updateEntryStatus,updateEntryDuration ,createClient,deleteClient} from '../api';
     import Input from "../utility/Input.svelte";
     import Popup from "../utility/Popup.svelte";
     import {registerListener , unregisterListener, EVENTS, fireEvent} from '../EventManager';
     import Sidebar from "../Sidebar.svelte";
     import Container from "../Container.svelte";
-    import {getEntryPaymentStatusClass , DEFAULTS , PAYMENT_STATUS , ENTRY_DURATIONS , convertDateToString , convertDateToTimeString} from "../constants";
+    import {getEntryPaymentStatusClass , sortWorkEntry , DEFAULTS , PAYMENT_STATUS , ENTRY_DURATIONS , convertDateToString , convertDateToTimeString} from "../constants";
 
     let store = [];
     let clients = [];
@@ -51,6 +51,8 @@
     const processSelectClientEvent = (client) => {
         selected_client = client;
         work_entries = store.filter(entry => entry.Client[0]._id === client._id);
+        work_entries.sort(sortWorkEntry());
+        work_entries = work_entries;
     }
 
     const saveNewClient = () => {
@@ -136,6 +138,7 @@
                     store[i].Payment_Status = entry.Payment_Status;
                 }
             }
+            work_entries.sort(sortWorkEntry());
             work_entries = work_entries;
             store = store;
             fireEvent(EVENTS.HIDE_SPINNER,{});
@@ -162,6 +165,7 @@
                     store[i].Amount = res.Amount;
                 }
             }
+            work_entries.sort(sortWorkEntry());
             work_entries = work_entries;
             store = store;
             fireEvent(EVENTS.HIDE_SPINNER,{});
@@ -219,6 +223,7 @@
                 Duration : DEFAULTS.DURATION
             };
 
+            work_entries.sort(sortWorkEntry());
             work_entries = work_entries;
             store = store;
             fireEvent(EVENTS.HIDE_SPINNER,{});
@@ -247,6 +252,8 @@
                     break;
                 }
             }
+
+            work_entries.sort(sortWorkEntry());
             work_entries = work_entries;
             store = store;
             fireEvent(EVENTS.HIDE_SPINNER,{});
