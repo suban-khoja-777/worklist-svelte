@@ -50,6 +50,7 @@
 
     const processSelectClientEvent = (client) => {
         selected_client = client;
+        console.log(store);
         work_entries = store.filter(entry => entry.Client[0]._id === client._id);
         work_entries.sort(sortWorkEntry());
         work_entries = work_entries;
@@ -72,7 +73,7 @@
         createClient(new_client)
         .then(res => {
             clients.push({
-                _id : res._id,
+                _id : res.Id,
                 Name : res.Name,
                 Rate : res.Rate
             });
@@ -191,13 +192,14 @@
         }else{
             entry_fields.Start_Time = true;
         }
-
+        console.log('new_entry ',new_entry);
         fireEvent(EVENTS.SHOW_SPINNER,{});
         createTimeEntry(new_entry)
         .then(res => {
+            console.log('## ',res);
             work_entries.push({
-                _id:res._id,
-                Client : res.Client,
+                _id:res.Id,
+                Client : new_entry.Client,
                 Start_Date : new_entry.Start_Date,
                 Start_Time : new_entry.Start_Time,
                 Payment_Status : new_entry.Payment_Status,
