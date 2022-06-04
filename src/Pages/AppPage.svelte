@@ -199,7 +199,7 @@
             console.log('## ',res);
             work_entries.push({
                 _id:res.Id,
-                Client : new_entry.Client,
+                Client : [new_entry.Client],
                 Start_Date : new_entry.Start_Date,
                 Start_Time : new_entry.Start_Time,
                 Payment_Status : new_entry.Payment_Status,
@@ -208,8 +208,8 @@
             });
 
             store.push({
-                _id:res._id,
-                Client : res.Client,
+                _id:res.Id,
+                Client : [new_entry.Client],
                 Start_Date : new_entry.Start_Date,
                 Start_Time : new_entry.Start_Time,
                 Payment_Status : new_entry.Payment_Status,
